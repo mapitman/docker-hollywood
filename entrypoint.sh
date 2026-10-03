@@ -7,7 +7,13 @@
 # 1920x1080 with a typical font) gives 4 panes with the default of 1400 cells per pane.
 #
 #   HOLLYWOOD_CELLS_PER_PANE  cells per pane (default 1400)
-#   HOLLYWOOD_DELAY           seconds before all panes are replaced (default 60)
+#   HOLLYWOOD_DELAY           minimum seconds a pane keeps a widget (default 60)
+#   HOLLYWOOD_REBUILD         seconds between layout rebuilds (default 600, 0 = never)
+#
+# Each pane keeps a widget for a random time from the delay to one and a half
+# times the delay, so panes change at different moments. The widget guard does
+# this. Every rebuild interval the Hollywood launcher keeps one pane, replaces
+# the others and builds a new random layout.
 #
 # Any -s/--splits or -d/--delay argument overrides the values computed here.
 #
@@ -39,18 +45,40 @@ pane_count() {
 	echo "$panes"
 }
 
-has_splits=
-has_delay=
-for arg in "$@"; do
-	case "$arg" in
-		-s|--splits) has_splits=1 ;;
-		-d|--delay) has_delay=1 ;;
-	esac
-done
+# The launcher replaces all panes but one every -d seconds, which builds a new
+# random layout. Use that for the slow rebuild, and pass the per-pane delay to
+# the widget guard. A rebuild interval of 0 gives the launcher a delay that never ends.
+NO_REFRESH=2147483647
 
+has_splits=
 args=()
+passthrough=()
+while [ $# -gt 0 ]; do
+	case "$1" in
+		-d|--delay)
+			[ $# -ge 2 ] && { DELAY=$2; shift; }
+			;;
+		-s|--splits)
+			has_splits=1
+			passthrough+=("$1")
+			[ $# -ge 2 ] && { passthrough+=("$2"); shift; }
+			;;
+		*)
+			passthrough+=("$1")
+			;;
+	esac
+	shift
+done
+case "$DELAY" in ''|*[!0-9]*) DELAY=60 ;; esac
+[ "$DELAY" -lt 2 ] && DELAY=2
+export HOLLYWOOD_DELAY=$DELAY
+
+REBUILD=${HOLLYWOOD_REBUILD:-600}
+case "$REBUILD" in ''|*[!0-9]*) REBUILD=600 ;; esac
+[ "$REBUILD" -eq 0 ] && REBUILD=$NO_REFRESH
+
 [ -z "$has_splits" ] && args+=(-s "$(pane_count)")
-[ -z "$has_delay" ] && args+=(-d "$DELAY")
+args+=(-d "$REBUILD")
 
 # Run Hollywood as a child, not with exec, so this script can restore the
 # terminal after it exits. cmatrix and mplayer hide the cursor, switch to the
@@ -66,7 +94,7 @@ restore_terminal() {
 trap restore_terminal EXIT
 
 # "<&0" keeps the terminal as stdin; bash would otherwise use /dev/null.
-"$HOLLYWOOD" "${args[@]}" "$@" <&0 &
+"$HOLLYWOOD" "${args[@]}" "${passthrough[@]}" <&0 &
 child=$!
 trap 'kill -TERM "$child" 2>/dev/null' TERM INT HUP
 

@@ -1,4 +1,4 @@
-FROM debian:testing-slim
+FROM debian:trixie-slim
 ARG VCS_REF
 ARG BUILD_DATE
 LABEL maintainer="Mark Pitman <pitman.io>"
@@ -11,20 +11,33 @@ RUN rm -f /etc/dpkg/dpkg.cfg.d/docker* \
     && sed -i '/path-exclude/d' /etc/dpkg/dpkg.cfg.d/* 2>/dev/null; true
 
 # One package per widget tool. Recommends are off so the list below is the
-# complete set of tools Hollywood can use.
+# complete set of tools Hollywood can use. The Hollywood scripts themselves come
+# from the upstream source below, not from a package.
 RUN apt-get update \
     && apt-get -y install --no-install-recommends \
-        hollywood byobu tmux procps ncurses-term \
+        byobu tmux procps ncurses-term \
         apg atop bat bmon bsdextrautils ccze cmatrix figlet htop jp2a \
-        man-db manpages mplayer openssh-client pv python3-pygments \
+        man-db manpages moreutils mplayer openssh-client pv python3-pygments \
         speedometer tree \
     && apt-get -y --reinstall install coreutils findutils \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Hollywood from the upstream source at the commit tagged 1.25. The
+# Debian stable package is version 1.21, which has broken widgets and a launcher
+# that loses the -s and -d options. The layout matches the Debian package:
+# launcher in /usr/games, widgets in /usr/lib/hollywood, data in /usr/share.
+ADD https://github.com/dustinkirkland/hollywood.git#4bfa29772a6e2f1e4aecbd3e26fde7dc69cce6eb /usr/src/hollywood
+RUN install -D -m 755 /usr/src/hollywood/bin/hollywood /usr/games/hollywood \
+    && mkdir -p /usr/lib /usr/share/man/man1 \
+    && cp -a /usr/src/hollywood/lib/hollywood /usr/lib/hollywood \
+    && cp -a /usr/src/hollywood/share/hollywood /usr/share/hollywood \
+    && install -m 644 /usr/src/hollywood/share/man/man1/hollywood.1 /usr/share/man/man1/hollywood.1 \
+    && rm -rf /usr/src/hollywood
+
 # The stock launcher gives up on a pane when tmux refuses a split because the
 # chosen pane is too small, so you sometimes get fewer panes than requested.
 # The patch retries other panes. It applies with no fuzz, so the build fails if
-# the Hollywood package changes the code it patches.
+# the Hollywood source changes the code it patches.
 COPY launcher-retry-splits.patch /tmp/launcher-retry-splits.patch
 RUN apt-get update \
     && apt-get -y install --no-install-recommends patch \

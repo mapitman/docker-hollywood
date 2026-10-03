@@ -6,12 +6,18 @@
 # too small at start, or becomes too small after a resize, it stops the widget
 # and starts a different widget that fits in the same pane.
 #
+# Each pane also changes its own widget. A widget runs for a random time from
+# HOLLYWOOD_DELAY seconds (default 60) to one and a half times that. Then the pane
+# swaps in another free widget. Each pane picks its own time, so the panes do not
+# all change together.
+#
 # Each running widget also holds a claim in $CLAIM_DIR, so no two panes run the
 # same widget. A claim is a symlink whose target is the PID of the guard that
 # owns it. Creating a symlink is atomic, so two guards cannot claim one widget.
 
 REAL_DIR=/opt/hollywood/lib/hollywood
 CLAIM_DIR=/tmp/hollywood-claims
+DELAY=${HOLLYWOOD_DELAY:-60}
 
 # Minimum pane size per widget. Widgets that are not listed have no minimum.
 declare -A MIN_COLS=([atop]=60 [bmon]=48 [figlet]=57 [sshart]=20)
@@ -89,8 +95,14 @@ kill_tree() {
 	kill "$pid" 2>/dev/null
 }
 
+# Seconds to keep a widget: a random time from DELAY to one and a half times DELAY.
+lifetime() {
+	echo $((DELAY + RANDOM % (DELAY / 2 + 1)))
+}
+
 cleanup() {
 	[ -n "$child" ] && kill_tree "$child"
+	[ -n "$timer" ] && kill "$timer" 2>/dev/null
 	[ -n "$widget" ] && release "$widget"
 	exit 0
 }
@@ -98,21 +110,29 @@ trap cleanup HUP INT TERM
 # Wake "wait" on resize so the size can be checked.
 trap : WINCH
 
-preferred=$(basename "$0")
 failed=
+# With no free widget that fits, close this pane instead of repeating one.
+widget=$(pick "$(basename "$0")" "$failed") || exit 0
 while true; do
-	# With no free widget that fits, close this pane instead of repeating one.
-	widget=$(pick "$preferred" "$failed") || exit 0
-	preferred=
 	started=$SECONDS
 	"$REAL_DIR/$widget" <&0 &
 	child=$!
-	# Keep waiting while the widget runs and still fits.
+	sleep "$(lifetime)" &
+	timer=$!
+	next=
+	# Run until the widget exits, the pane is too small, or the time is up.
 	while kill -0 "$child" 2>/dev/null && fits "$widget"; do
-		wait "$child" 2>/dev/null
+		if ! kill -0 "$timer" 2>/dev/null; then
+			# Time is up: swap in another free widget. If there is none, keep this one.
+			next=$(pick "" "$widget $failed") && break
+			sleep "$(lifetime)" &
+			timer=$!
+		fi
+		wait -n "$child" "$timer" 2>/dev/null
 	done
+	kill "$timer" 2>/dev/null
 	if kill -0 "$child" 2>/dev/null; then
-		# Pane too small now: stop this widget and pick another.
+		# Time is up or the pane is too small: stop this widget.
 		kill_tree "$child"
 	elif [ $((SECONDS - started)) -lt 5 ]; then
 		# Exited right away (for example, a missing tool): do not pick it again.
@@ -120,5 +140,11 @@ while true; do
 	fi
 	wait "$child" 2>/dev/null
 	child=
+	timer=
 	release "$widget"
+	if [ -n "$next" ]; then
+		widget=$next
+	else
+		widget=$(pick "" "$failed") || exit 0
+	fi
 done
