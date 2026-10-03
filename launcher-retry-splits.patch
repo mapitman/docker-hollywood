@@ -1,0 +1,29 @@
+--- a/hollywood
++++ b/hollywood
+@@ -38,12 +38,21 @@
+ 	sleep 0.5
+ 	for w in $(ls "$WIDGET_DIR" | sort -R); do
+ 		[ "$dir" = "-v" ] && dir="-h" || dir="-v"
+-		panes=$(tmux list-panes -t $PKG 2>/dev/null)
+-		# Allow for failed widgets
+-		splits=$(echo "$panes" | wc -l)
+-		pane=$((RANDOM % $splits))
+-		tmux split-window $dir -t ${PKG}.$pane "nice -n 19 $WIDGET_DIR/$w" >/dev/null 2>&1
++		panes=$(tmux list-panes -t $PKG -F '#{pane_id}' 2>/dev/null | sort -R)
++		# Try each pane in random order, in both directions, until one has room.
++		placed=
++		for pane in $panes; do
++			for d in "$dir" -v -h; do
++				if tmux split-window $d -t "$pane" "nice -n 19 $WIDGET_DIR/$w" >/dev/null 2>&1; then
++					placed=1
++					break
++				fi
++			done
++			[ -n "$placed" ] && break
++		done
+ 		sleep 0.2
++		# No pane has room for another split.
++		[ -n "$placed" ] || break
+ 		split=$((split+1))
+ 		if [ $split -ge $SPLITS ]; then
+ 			break
