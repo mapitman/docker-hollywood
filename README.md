@@ -13,6 +13,14 @@ docker run -it --rm mapitman/hollywood
 To exit, you may have to press `<ctrl> - c` multiple times. Once Hollywood
 stops spawning windows, press `<ctrl> - d` to exit the container.
 
+You can also stop it from another terminal with `docker stop hollywood`
+(when you started it with `--name hollywood`).
+
+When Hollywood exits, the entrypoint resets your terminal: it shows the cursor, leaves the
+alternate screen and turns off mouse reporting. This also happens after `docker stop`.
+It cannot happen after `docker kill`, because Docker ends the container with no chance to clean up.
+If your cursor is missing after `docker kill`, run `reset` (or `tput cnorm`).
+
 ## Pane count and refresh time
 
 The entrypoint script sizes the number of panes to your terminal. Docker passes the
