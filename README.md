@@ -21,6 +21,49 @@ alternate screen and turns off mouse reporting. This also happens after `docker 
 It cannot happen after `docker kill`, because Docker ends the container with no chance to clean up.
 If your cursor is missing after `docker kill`, run `reset` (or `tput cnorm`).
 
+## Build and run locally
+
+```sh
+just build
+just run
+```
+
+`just run` names the container `hollywood`, so you can stop it with `docker stop hollywood`.
+
+## Widgets
+
+Hollywood opens a tmux session and fills it with panes. Each pane runs one widget, which wraps an
+ordinary tool. The image has 20 widgets.
+
+| Widget | Shows |
+|---|---|
+| `apg` | random passwords from `/dev/urandom`, colored with `ccze` |
+| `atop` | system and process monitor (needs 60 x 24) |
+| `bat` | random source files from `/usr`, syntax highlighted with `batcat` |
+| `bmon` | network bandwidth monitor (needs 48 x 26, or 141 x 18) |
+| `cmatrix` | falling green characters, as in The Matrix |
+| `code` | random C, C++, Java and Python files, highlighted with `pygmentize` |
+| `errno` | the list of error codes, in random order |
+| `figlet` | large ASCII words such as ACCESS GRANTED (needs 57 x 7) |
+| `hexdump` | hex dumps of programs in `/usr/bin` |
+| `htop` | interactive process viewer |
+| `jp2a` | JPEG images drawn as ASCII art |
+| `logs` | log files under `/var/log` |
+| `man` | random man pages |
+| `map` | a world map drawn as ASCII art with `jp2a` |
+| `mplayer` | a sound-wave video drawn as ASCII art with `mplayer` |
+| `pv` | a fake file-transfer progress bar |
+| `speedometer` | network throughput graph |
+| `sshart` | random `ssh-keygen` key art (needs 20 x 12) |
+| `stat` | file details for random paths under `/sys` and `/dev` |
+| `tree` | directory trees under `/sys` and `/dev` |
+
+The Debian slim image removes man pages and documentation. The Dockerfile puts them back so the
+`man` and `code` widgets have something to show.
+
+The `jp2a` widget draws every JPEG it finds under `/usr`. Debian has no wallpaper package like Ubuntu's,
+so the image has only one JPEG (the `map` picture), and `jp2a` shows it repeatedly.
+
 ## Pane count and refresh time
 
 The entrypoint script sizes the number of panes to your terminal. Docker passes the
