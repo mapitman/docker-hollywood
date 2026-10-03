@@ -7,7 +7,7 @@
 # and starts a different widget that fits in the same pane.
 #
 # Each pane also changes its own widget. A widget runs for a random time from
-# HOLLYWOOD_DELAY seconds (default 60) to one and a half times that. Then the pane
+# HOLLYWOOD_DELAY seconds (default 30) to one and a half times that. Then the pane
 # swaps in another free widget. Each pane picks its own time, so the panes do not
 # all change together.
 #
@@ -17,7 +17,7 @@
 
 REAL_DIR=/opt/hollywood/lib/hollywood
 CLAIM_DIR=/tmp/hollywood-claims
-DELAY=${HOLLYWOOD_DELAY:-60}
+DELAY=${HOLLYWOOD_DELAY:-30}
 
 # Minimum pane size per widget. Widgets that are not listed have no minimum.
 declare -A MIN_COLS=([atop]=60 [bmon]=48 [figlet]=57 [sshart]=20)
@@ -40,13 +40,6 @@ fits() {
 	[ "$cols" -ge "${MIN_COLS[$1]:-1}" ] && [ "$rows" -ge "$(min_rows "$1" "$cols")" ]
 }
 
-# Widgets that run the same program share one claim.
-declare -A GROUP=([map]=jp2a)
-
-claim_key() {
-	echo "${GROUP[$1]:-$1}"
-}
-
 # Succeed if the claim at $1 belongs to a guard that is still running.
 claim_is_live() {
 	local pid
@@ -56,7 +49,7 @@ claim_is_live() {
 
 # Claim widget $1 for this guard. Fail if another live guard holds it.
 claim() {
-	local link="$CLAIM_DIR/$(claim_key "$1")"
+	local link="$CLAIM_DIR/$1"
 	mkdir -p "$CLAIM_DIR"
 	ln -s "$$" "$link" 2>/dev/null && return 0
 	[ "$(readlink "$link")" = "$$" ] && return 0
@@ -67,7 +60,7 @@ claim() {
 }
 
 release() {
-	local link="$CLAIM_DIR/$(claim_key "$1")"
+	local link="$CLAIM_DIR/$1"
 	[ "$(readlink "$link" 2>/dev/null)" = "$$" ] && rm -f "$link"
 }
 

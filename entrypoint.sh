@@ -7,7 +7,7 @@
 # 1920x1080 with a typical font) gives 4 panes with the default of 1400 cells per pane.
 #
 #   HOLLYWOOD_CELLS_PER_PANE  cells per pane (default 1400)
-#   HOLLYWOOD_DELAY           minimum seconds a pane keeps a widget (default 60)
+#   HOLLYWOOD_DELAY           minimum seconds a pane keeps a widget (default 30)
 #   HOLLYWOOD_REBUILD         seconds between layout rebuilds (default 600, 0 = never)
 #
 # Each pane keeps a widget for a random time from the delay to one and a half
@@ -23,7 +23,7 @@
 HOLLYWOOD=/usr/games/hollywood
 WIDGET_DIR=/usr/lib/hollywood
 CELLS_PER_PANE=${HOLLYWOOD_CELLS_PER_PANE:-1400}
-DELAY=${HOLLYWOOD_DELAY:-60}
+DELAY=${HOLLYWOOD_DELAY:-30}
 
 terminal_cells() {
 	local rows cols
@@ -69,7 +69,7 @@ while [ $# -gt 0 ]; do
 	esac
 	shift
 done
-case "$DELAY" in ''|*[!0-9]*) DELAY=60 ;; esac
+case "$DELAY" in ''|*[!0-9]*) DELAY=30 ;; esac
 [ "$DELAY" -lt 2 ] && DELAY=2
 export HOLLYWOOD_DELAY=$DELAY
 

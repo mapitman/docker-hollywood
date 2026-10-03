@@ -1,6 +1,6 @@
 --- a/hollywood
 +++ b/hollywood
-@@ -38,12 +38,21 @@
+@@ -38,17 +38,28 @@
  	sleep 0.5
  	for w in $(ls "$WIDGET_DIR" | sort -R); do
  		[ "$dir" = "-v" ] && dir="-h" || dir="-v"
@@ -27,3 +27,10 @@
  		split=$((split+1))
  		if [ $split -ge $SPLITS ]; then
  			break
+ 		fi
+ 	done
++	# Make the panes the same size when there is an even number of them.
++	/usr/local/bin/hollywood-layout "$PKG"
+ }
+ 
+ WIDGET_DIR="$(dirname $0)/../lib/$PKG"
