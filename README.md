@@ -123,3 +123,34 @@ is too small, the launcher does not retry, so you get fewer panes than requested
 `launcher-retry-splits.patch` makes the launcher try every pane in random order, in both directions,
 until one has room. The Docker build applies the patch with no fuzz, so the build fails if a new
 `hollywood` package changes the patched code.
+
+## Why these changes
+
+This image differs from stock Hollywood in several ways. Each change fixes a problem we found.
+
+- **Debian testing instead of Ubuntu.** The Ubuntu base stopped building: `ubuntu:latest` became 26.04, which has no
+  `unminimize` and no `mplayer`. Debian testing has `mplayer`. It also has Hollywood 1.25, which has 20 widgets
+  where 1.21 (Debian stable and Ubuntu) has 17. On Debian stable, 1.21 has two broken widgets: `code` finds no files,
+  and `sshart` fails because it asks `ssh-keygen` for a DSA key that current OpenSSH rejects. Version 1.25 fixes both and
+  passes `-s` and `-d` through to its own tmux session. The trade-off is a moving base: rebuilds can pull newer packages.
+- **Pane count from terminal size.** Stock Hollywood 1.25 defaults to two panes per CPU. On an 8-CPU machine that is
+  16 panes, which are too small to read on a 1920x1080 screen. The entrypoint sizes the count to the terminal.
+- **60-second refresh.** Stock Hollywood replaces every pane every 10 seconds. That is not long enough to see
+  what is happening in each widget. Some examples:
+  - The `bmon` graph covers 60 seconds of history, so a pane that lasts 10 seconds shows only the first sixth of it.
+  - The `code` widget shows each file for 2 seconds and the `bat` widget for 3, so 10 seconds is only a few files.
+  - All panes change at the same moment, so you cannot finish reading one before it disappears.
+  - Each refresh also costs time. The launcher waits 0.5 seconds, then 0.2 seconds per split, so a 4-pane window
+    spends about 1.1 seconds rebuilding, with only some panes on screen. At 10 seconds that is more than a tenth
+    of the time. At 60 seconds it is under 2%.
+- **Launcher patch.** The launcher picks one random pane per split and never retries. When that pane was too small,
+  tmux refused the split and the window ended up with fewer panes than requested. At 161x37, 2 of 8 launches gave
+  3 panes instead of 4.
+- **Widget size guard.** Some widgets keep running in a pane that is too small and show a message instead of content:
+  `atop` asks for 60 x 24, and `bmon` asks you to enlarge the window. At 161x37 the largest panes are 18 rows tall.
+  A pane also shrinks while the launcher splits later panes, so the guard checks again on every resize.
+- **No repeated widgets.** The launcher picks the first widget separately from the rest. The pane that survives
+  a refresh also keeps its widget while the new panes can pick it again. The guard keeps one widget per pane.
+- **Terminal reset on exit.** `cmatrix` and `mplayer` hide the cursor, switch to the alternate screen and turn on
+  mouse reporting. They cannot undo this when the container stops, so the terminal had no cursor afterward.
+- **Man pages and docs restored.** The slim image removes them, and the `man` and `code` widgets need them.
