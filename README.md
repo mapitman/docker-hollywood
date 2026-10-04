@@ -12,7 +12,7 @@
 
 *The terminal that makes you look like you are hacking the mainframe. Re-edited. No studio notes.*
 
-*Rated T for Terminal. Contains falling green letters and mild technobabble.*
+*🎟️ Rated T for Terminal. Contains falling green letters and mild technobabble.*
 
 [Hollywood](https://github.com/dustinkirkland/hollywood) fills your terminal with busy technobabble: `htop` here,
 falling green letters there, a world map for good measure. The Director's Cut is the same movie in a container, with
@@ -20,7 +20,7 @@ the footage re-edited so that it looks better on your screen.
 
 The original script is by Dustin Kirkland. This cut is a new edit of it.
 
-## Now showing
+## 🍿 Now showing
 
 ```sh
 docker run -it --rm mapitman/hollywood-directors-cut
@@ -38,26 +38,26 @@ turns off mouse reporting. This also happens after `docker stop`. It cannot happ
 Docker ends the container with no chance to clean up. If your cursor is missing after `docker kill`, run `reset`
 (or `tput cnorm`).
 
-## What is new in the Director's Cut
+## ✨ What is new in the Director's Cut
 
 The original runs. This cut runs better.
 
-- **It fits your screen.** The number of panes follows the size of your terminal, and an even number of panes are
+- 🖥️ **It fits your screen.** The number of panes follows the size of your terminal, and an even number of panes are
   all the same size. The original makes two panes per CPU, which is 16 panes on an 8-CPU machine.
-- **Every pane has its own schedule.** Each pane changes its widget at its own time, 30 to 45 seconds after the
+- ⏱️ **Every pane has its own schedule.** Each pane changes its widget at its own time, 30 to 45 seconds after the
   last change, and no two panes show the same widget. Every 10 minutes the whole window is cut again with a new
   layout.
-- **A new look for the pictures.** The sound wave, the wallpapers and the world map are drawn in color with half
+- 🎨 **A new look for the pictures.** The sound wave, the wallpapers and the world map are drawn in color with half
   blocks, so every cell shows two pixels. There are no random letters and nothing scrolls. The image brings 171
   wallpapers, from the KDE Plasma set.
-- **No bad seats.** A widget that needs more room than its pane has is swapped for one that fits.
-- **A fixed set.** The base is Debian 13 (stable), and Hollywood 1.25 comes from a pinned upstream commit. All 20
+- 💺 **No bad seats.** A widget that needs more room than its pane has is swapped for one that fits.
+- 📌 **A fixed set.** The base is Debian 13 (stable), and Hollywood 1.25 comes from a pinned upstream commit. All 20
   widgets work.
-- **It cleans up.** Your terminal is reset when the show ends, and Byobu never asks about ctrl-a.
+- 🧹 **It cleans up.** Your terminal is reset when the show ends, and Byobu never asks about ctrl-a.
 
 The details are in "Behind the scenes". The reasons are in "Director's commentary".
 
-## The cast
+## 🎭 The cast
 
 Hollywood opens a tmux session and fills it with panes. Each pane runs one widget, which wraps an ordinary tool.
 There are 20 widgets. All of them play themselves.
@@ -88,7 +88,7 @@ There are 20 widgets. All of them play themselves.
 The Debian slim image removes man pages and documentation. The Dockerfile puts them back so the `man` and `code`
 widgets have something to show.
 
-## Production notes
+## 📝 Production notes
 
 Every setting is an environment variable, because even directors take notes.
 
@@ -113,7 +113,7 @@ docker run -it --rm mapitman/hollywood-directors-cut -s 6 -d 60
 
 To find your terminal size, run `stty size` (it prints rows, then columns).
 
-## Behind the scenes
+## 🎞️ Behind the scenes
 
 How the movie gets made.
 
@@ -231,7 +231,7 @@ just run
 `just build` tags the image with both of its names, `mapitman/hollywood-directors-cut` and `mapitman/hollywood`.
 `just run` names the container `hollywood`, so you can stop it with `docker stop hollywood`.
 
-## Director's commentary
+## 🎙️ Director's commentary
 
 Why each scene was cut the way it was. Each change has a reason.
 
@@ -283,10 +283,10 @@ Why each scene was cut the way it was. Each change has a reason.
   `mapitman/hollywood-directors-cut`. Docker Hub has no alias feature, so the same image is also published as
   `mapitman/hollywood`, and commands that use the old name keep working.
 
-## Credits
+## 🏆 Credits
 
 Written by Dustin Kirkland. Re-edited by Mark Pitman. Wallpapers from the KDE Plasma set, by way of Debian. No
-terminals were harmed in the making of this image.
+terminals were harmed in the making of this image. 🎬
 
 The files in this repository are licensed under the MIT license (see `LICENSE`). Hollywood is licensed under the
 Apache License 2.0 (Copyright 2014 Dustin Kirkland), and the wallpapers are GPL-2+. `THIRD-PARTY.md` lists each part
