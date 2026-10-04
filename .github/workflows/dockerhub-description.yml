@@ -17,6 +17,8 @@ jobs:
   description:
     runs-on: ubuntu-latest
     strategy:
+      # Update each repository on its own, so one failure does not cancel the other.
+      fail-fast: false
       matrix:
         include:
           - repository: mapitman/hollywood-directors-cut
@@ -27,7 +29,7 @@ jobs:
             notice: "> **This is the same image as [mapitman/hollywood-directors-cut](https://hub.docker.com/r/mapitman/hollywood-directors-cut).** The project is now called Hollywood: Director's Cut. Both names are kept up to date, so commands that use this name keep working."
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build the description
         env:
@@ -41,7 +43,7 @@ jobs:
           cat README.md >> description.md
 
       - name: Update the Docker Hub repository
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
