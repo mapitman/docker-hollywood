@@ -29,7 +29,7 @@ jobs:
             notice: "> **This is the same image as [mapitman/hollywood-directors-cut](https://hub.docker.com/r/mapitman/hollywood-directors-cut).** The project is now called Hollywood: Director's Cut. Both names are kept up to date, so commands that use this name keep working."
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build the description
         env:
