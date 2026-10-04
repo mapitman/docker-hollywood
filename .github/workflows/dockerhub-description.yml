@@ -17,6 +17,8 @@ jobs:
   description:
     runs-on: ubuntu-latest
     strategy:
+      # Update each repository on its own, so one failure does not cancel the other.
+      fail-fast: false
       matrix:
         include:
           - repository: mapitman/hollywood-directors-cut
@@ -41,7 +43,7 @@ jobs:
           cat README.md >> description.md
 
       - name: Update the Docker Hub repository
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
