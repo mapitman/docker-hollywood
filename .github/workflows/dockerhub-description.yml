@@ -2,16 +2,12 @@ name: Update Docker Hub description
 
 # The image is published under two names, and each name is its own repository on
 # Docker Hub with its own description. This workflow copies the README into both
-# repositories whenever the README changes on main. You can also run it by hand.
+# repositories. The publish workflow calls it after a release was published, so the
+# descriptions change only with a release. You can also run it by hand.
 
 on:
+  workflow_call:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - README.md
-      - .github/workflows/dockerhub-description.yml
 
 jobs:
   description:
