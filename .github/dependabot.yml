@@ -1,0 +1,12 @@
+# Open a pull request when a GitHub Action used by the workflows has a new version.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Put all of the updates of one week into a single pull request.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
