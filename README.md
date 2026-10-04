@@ -14,6 +14,8 @@
 
 *🎟️ Rated T for Terminal. Contains falling green letters and mild technobabble.*
 
+*🦖 Bystanders will say: ["It's a UNIX system, I know this!"](https://www.youtube.com/watch?v=JOeY07qKU9c)*
+
 [Hollywood](https://github.com/dustinkirkland/hollywood) fills your terminal with busy technobabble: `htop` here,
 falling green letters there, a world map for good measure. The Director's Cut is the same movie in a container, with
 the footage re-edited so that it looks better on your screen.
