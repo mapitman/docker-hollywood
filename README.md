@@ -10,7 +10,7 @@
  └──────────────────────────────────────────────────┘
 ```
 
-*The terminal that makes you look like you are hacking the Gibson. Re-edited. No studio notes.*
+*The terminal that makes you look like you are [hacking the Gibson](https://en.wikipedia.org/wiki/Hackers_%28film%29). Re-edited. No studio notes.*
 
 *🎟️ Rated T for Terminal. Contains falling green letters and mild technobabble.*
 
