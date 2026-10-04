@@ -13,7 +13,7 @@
 #
 # Based on the widget of the same name in Hollywood
 # (https://github.com/dustinkirkland/hollywood), Copyright 2014 Dustin Kirkland,
-# licensed under the Apache License 2.0. The changes are by the docker-hollywood
+# licensed under the Apache License 2.0. The changes are by the hollywood-directors-cut
 # project and are licensed under the MIT license. See LICENSE and THIRD-PARTY.md.
 
 command -v mplayer >/dev/null 2>&1 || exit 1

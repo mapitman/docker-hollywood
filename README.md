@@ -1,4 +1,4 @@
-# docker-hollywood
+# hollywood-directors-cut
 
 [Hollywood](https://github.com/dustinkirkland/hollywood) in a container.
 

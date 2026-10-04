@@ -17,7 +17,7 @@ See THIRD-PARTY.md.
  # See the License for the specific language governing permissions and
  # limitations under the License.
 +#
-+# Modified for docker-hollywood (https://github.com/mapitman/docker-hollywood):
++# Modified for hollywood-directors-cut (https://github.com/mapitman/hollywood-directors-cut):
 +# a split that tmux refuses is tried again in other panes, and an even number of
 +# panes is arranged in a grid of equal sizes. See launcher.patch in that project.
  
