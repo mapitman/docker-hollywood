@@ -24,7 +24,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: mapitman/hollywood
+          # The same image is published under both names.
+          images: |
+            mapitman/hollywood-directors-cut
+            mapitman/hollywood
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}

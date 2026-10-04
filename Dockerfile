@@ -41,7 +41,7 @@ RUN install -D -m 755 /usr/src/hollywood/bin/hollywood /usr/games/hollywood \
 # The licenses of this project and of the software in the image: the notice file
 # lists everything that comes from other projects and what was changed.
 COPY THIRD-PARTY.md /usr/share/doc/hollywood/THIRD-PARTY.md
-COPY LICENSE /usr/share/doc/hollywood/LICENSE-docker-hollywood
+COPY LICENSE /usr/share/doc/hollywood/LICENSE-hollywood-directors-cut
 
 # The jp2a widget draws every JPEG file it finds under /usr, and the image has
 # only one of its own. Add the wallpapers from the KDE Plasma package. Only the
@@ -88,9 +88,9 @@ RUN byobu-ctrl-a screen
 # The stock launcher gives up on a pane when tmux refuses a split because the
 # chosen pane is too small, so you sometimes get fewer panes than requested. It
 # also leaves the panes at uneven sizes. The launcher patch retries other panes
-# and arranges an even number of panes in a grid of equal sizes. The patch applies
-# with no fuzz, so the build fails if the Hollywood source changes the code it
-# patches.
+# and arranges an even number of panes in a grid of equal sizes. --fuzz=0 makes
+# patch require an exact match with the code around each change, so the build
+# fails if the Hollywood source changes that code.
 COPY launcher.patch /tmp/launcher.patch
 COPY --chmod=755 even-layout.sh /usr/local/bin/hollywood-layout
 RUN apt-get update \
@@ -116,5 +116,5 @@ COPY --chmod=755 entrypoint.sh /usr/local/bin/hollywood-entrypoint
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="https://github.com/mapitman/docker-hollywood"
+      org.label-schema.vcs-url="https://github.com/mapitman/hollywood-directors-cut"
 ENTRYPOINT ["/usr/local/bin/hollywood-entrypoint"]

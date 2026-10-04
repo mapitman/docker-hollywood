@@ -1,40 +1,66 @@
-# docker-hollywood
+# 🎬 Hollywood: Director's Cut
 
-[Hollywood](https://github.com/dustinkirkland/hollywood) in a container.
-
-The image is based on `debian:trixie-slim` (Debian 13, the current stable release).
-It installs Hollywood 1.25 from the upstream source at a pinned commit, with all 20 widgets.
-
-## Usage
-
-```sh
-docker run -it --rm mapitman/hollywood
+```text
+ ┌──────────────────────────────────────────────────┐
+ │  HOLLYWOOD: DIRECTOR'S CUT                       │
+ ├─────────────┬─────────────┬──────────────────────┤
+ │ SCENE: ∞    │ TAKE: 1     │ ROLL: /dev/urandom   │
+ ├─────────────┴─────────────┴──────────────────────┤
+ │ DIRECTOR: you         CAMERA: tmux               │
+ └──────────────────────────────────────────────────┘
 ```
 
-To exit, you may have to press `<ctrl> - c` multiple times. Once Hollywood
-stops spawning windows, press `<ctrl> - d` to exit the container.
+*The terminal that makes you look like you are hacking the mainframe. Re-edited. No studio notes.*
 
-You can also stop it from another terminal with `docker stop hollywood`
-(when you started it with `--name hollywood`).
+*🎟️ Rated T for Terminal. Contains falling green letters and mild technobabble.*
 
-When Hollywood exits, the entrypoint resets your terminal: it shows the cursor, leaves the
-alternate screen and turns off mouse reporting. This also happens after `docker stop`.
-It cannot happen after `docker kill`, because Docker ends the container with no chance to clean up.
-If your cursor is missing after `docker kill`, run `reset` (or `tput cnorm`).
+[Hollywood](https://github.com/dustinkirkland/hollywood) fills your terminal with busy technobabble: `htop` here,
+falling green letters there, a world map for good measure. The Director's Cut is the same movie in a container, with
+the footage re-edited so that it looks better on your screen.
 
-## Build and run locally
+The original script is by Dustin Kirkland. This cut is a new edit of it.
+
+## 🍿 Now showing
 
 ```sh
-just build
-just run
+docker run -it --rm mapitman/hollywood-directors-cut
 ```
 
-`just run` names the container `hollywood`, so you can stop it with `docker stop hollywood`.
+The image is also published under its old name, `mapitman/hollywood`. Both names are the same image, so old
+commands keep working.
 
-## Widgets
+To leave the theater, press `<ctrl> - c` until the panes stop spawning, then press `<ctrl> - d` to exit the
+container. You can also stop it from another terminal with `docker stop hollywood` (when you started it with
+`--name hollywood`).
 
-Hollywood opens a tmux session and fills it with panes. Each pane runs one widget, which wraps an
-ordinary tool. The image has 20 widgets.
+When Hollywood exits, the entrypoint resets your terminal: it shows the cursor, leaves the alternate screen and
+turns off mouse reporting. This also happens after `docker stop`. It cannot happen after `docker kill`, because
+Docker ends the container with no chance to clean up. If your cursor is missing after `docker kill`, run `reset`
+(or `tput cnorm`).
+
+## ✨ What is new in the Director's Cut
+
+The original runs. This cut runs better.
+
+- 🖥️ **It fits your screen.** The number of panes follows the size of your terminal, and an even number of panes are
+  all the same size. The original makes two panes per CPU, which is 16 panes on an 8-CPU machine.
+- ⏱️ **Every pane has its own schedule.** Each pane changes its widget at its own time, 30 to 45 seconds after the
+  last change, and no two panes show the same widget. Every 10 minutes the whole window is cut again with a new
+  layout.
+- 🎨 **A new look for the pictures.** The sound wave, the wallpapers and the world map are drawn in color with half
+  blocks, so every cell shows two pixels. There are no random letters and nothing scrolls. The image brings 171
+  wallpapers, from the KDE Plasma set.
+- 💺 **No bad seats.** A widget that needs more room than its pane has is swapped for one that fits.
+- 📌 **A fixed set.** The base is Debian 13 (stable), and Hollywood 1.25 comes from a pinned upstream commit. All 20
+  widgets work.
+- 🧹 **It cleans up.** Your terminal is reset when the show ends, and Byobu never asks about ctrl-a.
+
+The details are in "Behind the scenes". The reasons are in "Director's commentary".
+
+## 🎭 The cast
+
+Hollywood opens a tmux session and fills it with panes. Each pane runs one widget, which wraps an ordinary tool.
+There are 20 widgets. All of them play themselves.
 
 | Widget | Shows |
 |---|---|
@@ -59,46 +85,12 @@ ordinary tool. The image has 20 widgets.
 | `stat` | file details for random paths under `/sys` and `/dev` |
 | `tree` | directory trees under `/sys` and `/dev` |
 
-The Debian slim image removes man pages and documentation. The Dockerfile puts them back so the
-`man` and `code` widgets have something to show.
+The Debian slim image removes man pages and documentation. The Dockerfile puts them back so the `man` and `code`
+widgets have something to show.
 
-## Wallpapers
+## 📝 Production notes
 
-The `jp2a` widget shows every JPEG it finds under `/usr`, one after another, except the map picture, which the
-`map` widget shows. The image adds the 171 wallpaper photos from Debian's `plasma-workspace-wallpapers` package (the KDE Plasma wallpapers) in
-`/usr/share/wallpapers`. The package's copyright file is in
-`/usr/share/doc/plasma-workspace-wallpapers/copyright`, and Debian lists the wallpapers as GPL-2+.
-
-The image replaces Hollywood's `jp2a` and `map` widgets. `image-widget.sh` is the `jp2a` widget, `map-widget.sh`
-is the `map` widget, and both draw with `image-render.py`. Each picture is scaled to your pane and drawn with half blocks in the 256-color palette, so every terminal cell
-shows two pixels. The picture keeps its shape and sits in the middle of the pane, with black bars where the shapes
-differ. The `jp2a` widget keeps each picture for 3 seconds. The `map` widget draws the map once. A pane of
-120 x 36 cells has only 120 x 72 pixels, so the pictures are blocky. When the pane changes size, the widgets draw
-the picture again.
-
-The widget never needs more than a few hundred columns of pixels, so the build shrinks the big photos with
-`shrink-jpeg.sh`: photos 3000 pixels wide or more to a quarter of their size, and photos 1500 pixels wide or
-more to half. That cuts the wallpapers from about 95 MB to 23 MB. The build fails if fewer than 150 wallpapers
-are installed.
-
-To run just one of these widgets, use `jp2a` or `map` as the last part of the path:
-
-```sh
-docker run -it --rm --entrypoint /opt/hollywood/lib/hollywood/jp2a mapitman/hollywood
-docker run -it --rm --entrypoint /opt/hollywood/lib/hollywood/map mapitman/hollywood
-```
-
-## Pane count and widget time
-
-The entrypoint script sizes the number of panes to your terminal. Docker passes the
-terminal size in character cells, so the script divides the cell count by 1400.
-The result is limited to two panes per CPU and to the number of widgets, with a minimum of 2.
-A 161x37 terminal (a full-screen terminal at 1920x1080 with a typical font) gives 4 panes.
-
-Each pane keeps its widget for 30 to 45 seconds, then swaps in another unused widget.
-Every pane picks its own time, so the panes change at different moments.
-Every 10 minutes the window is rebuilt: one pane stays, the others are replaced, and the panes are laid out
-again at random.
+Every setting is an environment variable, because even directors take notes.
 
 | Setting | Environment variable | Default |
 |---|---|---|
@@ -110,22 +102,45 @@ again at random.
 | Seconds the `jp2a` widget shows each picture | `HOLLYWOOD_IMAGE_SECONDS` | `3` |
 
 ```sh
-docker run -it --rm -e HOLLYWOOD_CELLS_PER_PANE=1000 -e HOLLYWOOD_DELAY=60 mapitman/hollywood
+docker run -it --rm -e HOLLYWOOD_CELLS_PER_PANE=1000 -e HOLLYWOOD_DELAY=60 mapitman/hollywood-directors-cut
 ```
 
 The `-s` (panes) and `-d` (minimum seconds a pane keeps a widget) options override the computed values:
 
 ```sh
-docker run -it --rm mapitman/hollywood -s 6 -d 60
+docker run -it --rm mapitman/hollywood-directors-cut -s 6 -d 60
 ```
 
 To find your terminal size, run `stty size` (it prints rows, then columns).
 
-## Widget size guard
+## 🎞️ Behind the scenes
 
-Some widgets stop working in a small pane. The image runs every widget through a guard script
-(`widget-guard.sh`). The guard checks the pane size when the widget starts and again after every resize.
-If the pane is too small, the guard stops the widget and starts a different one that fits.
+How the movie gets made.
+
+### Pane count and widget time
+
+The entrypoint script sizes the number of panes to your terminal. Docker passes the terminal size in character
+cells, so the script divides the cell count by 1400. The result is limited to two panes per CPU and to the number of
+widgets, with a minimum of 2. A 161x37 terminal (a full-screen terminal at 1920x1080 with a typical font) gives
+4 panes.
+
+Each pane keeps its widget for 30 to 45 seconds, then swaps in another unused widget. Every pane picks its own time,
+so the panes change at different moments. Every 10 minutes the window is rebuilt: one pane stays, the others are
+replaced, and the panes are laid out again at random.
+
+### Same-size panes
+
+When the pane count is even, every pane has the same size, give or take one cell for the borders. `even-layout.sh`
+arranges the panes in a grid of columns by rows. It picks the grid whose panes are closest to 2.5 times wider than
+tall, which looks about square in a terminal. For example, 4 panes make a 2 by 2 grid, 6 make 3 columns by 2 rows,
+and 8 make 4 columns by 2 rows. The grid is rebuilt every time the launcher rebuilds the window. An odd pane count
+keeps the random layout.
+
+### Widget size guard
+
+Some widgets stop working in a small pane. The image runs every widget through a guard script (`widget-guard.sh`).
+The guard checks the pane size when the widget starts and again after every resize. If the pane is too small, the
+guard stops the widget and starts a different one that fits.
 
 | Widget | Minimum columns x rows |
 |---|---|
@@ -134,63 +149,91 @@ If the pane is too small, the guard stops the widget and starts a different one 
 | `figlet` | 57 x 7 |
 | `sshart` | 20 x 12 |
 
-All other widgets run in any pane size. To change a minimum or add a widget, edit the `MIN_` tables
-and the `min_rows` function at the top of `widget-guard.sh`.
+All other widgets run in any pane size. To change a minimum or add a widget, edit the `MIN_` tables and the
+`min_rows` function at the top of `widget-guard.sh`.
 
 With the default settings on a 161x37 terminal, no pane is 24 rows tall, so `atop` never runs there.
 
-## No repeated widgets
+### No repeated widgets
 
-No two panes run the same widget. Each running widget holds a claim in `/tmp/hollywood-claims`,
-and a pane that starts or switches picks a widget that nobody else holds.
-If no unused widget fits in a new pane, the pane closes instead of repeating a widget.
-This only happens with many small panes (for example, 16 panes on a 320x90 terminal).
-When a pane is ready to swap and no other widget is free, it keeps its current widget.
+No two panes run the same widget. Each running widget holds a claim in `/tmp/hollywood-claims`, and a pane that
+starts or switches picks a widget that nobody else holds. If no unused widget fits in a new pane, the pane closes
+instead of repeating a widget. This only happens with many small panes (for example, 16 panes on a 320x90
+terminal). When a pane is ready to swap and no other widget is free, it keeps its current widget.
 
-## Patch to Hollywood
-
-The Docker build applies one patch with no fuzz, so the build fails if a new Hollywood source changes the code
-it patches.
-
-- `launcher.patch`: the Hollywood launcher picks one random pane for each split. When tmux refuses the split
-  because that pane is too small, the launcher does not retry, so you get fewer panes than requested. The patch
-  makes the launcher try every pane in random order, in both directions, until one has room. After the launcher
-  builds the panes, the patch also runs `even-layout.sh`, which gives an even number of panes the same size.
-  The patch also adds a notice to the launcher that says it was modified, as the Apache License asks.
-
-## The mplayer widget
+### The mplayer widget
 
 The image replaces Hollywood's `mplayer` widget with two small files, `mplayer-widget.sh` and
 `soundwave-render.py`.
 
-The video is a pre-rendered animation of an audio waveform. It has no sound track. The widget asks `mplayer` to
-crop the video to the rows where the waveform is, scale it to your pane, and send the raw frames to the renderer.
-The renderer draws each terminal cell as a half block, so every cell shows two pixels in true color. When the pane
+The video is a pre-rendered animation of an audio waveform. It has no sound track. The widget asks `mplayer` to crop
+the video to the rows where the waveform is, scale it to your pane, and send the raw frames to the renderer. The
+renderer draws each terminal cell as a half block, so every cell shows two pixels in true color. When the pane
 changes size, the widget starts again at the new size. A pane with an odd width leaves its last column empty.
 
 To run just this widget:
 
 ```sh
-docker run -it --rm --entrypoint /opt/hollywood/lib/hollywood/mplayer mapitman/hollywood
+docker run -it --rm --entrypoint /opt/hollywood/lib/hollywood/mplayer mapitman/hollywood-directors-cut
 ```
 
 Press ctrl-c to stop it. Run `reset` afterward if your cursor stays hidden.
 
-## Same-size panes
+### Wallpapers
 
-When the pane count is even, every pane has the same size, give or take one cell for the borders.
-`even-layout.sh` arranges the panes in a grid of columns by rows. It picks the grid whose panes are closest to
-2.5 times wider than tall, which looks about square in a terminal. For example, 4 panes make a 2 by 2 grid, 6 make
-3 columns by 2 rows, and 8 make 4 columns by 2 rows. The grid is rebuilt every time the launcher rebuilds the window.
-An odd pane count keeps the random layout.
+The `jp2a` widget shows every JPEG it finds under `/usr`, one after another, except the map picture, which the `map`
+widget shows. The image adds the 171 wallpaper photos from Debian's `plasma-workspace-wallpapers` package (the KDE
+Plasma wallpapers) in `/usr/share/wallpapers`. The package's copyright file is in
+`/usr/share/doc/plasma-workspace-wallpapers/copyright`, and Debian lists the wallpapers as GPL-2+.
 
-## Byobu ctrl-a
+The image replaces Hollywood's `jp2a` and `map` widgets. `image-widget.sh` is the `jp2a` widget, `map-widget.sh` is
+the `map` widget, and both draw with `image-render.py`. Each picture is scaled to your pane and drawn with half
+blocks in the 256-color palette, so every terminal cell shows two pixels. The picture keeps its shape and sits in
+the middle of the pane, with black bars where the shapes differ. The `jp2a` widget keeps each picture for 3 seconds.
+The `map` widget draws the map once. A pane of 120 x 36 cells has only 120 x 72 pixels, so the pictures are blocky.
+When the pane changes size, the widgets draw the picture again.
 
-Byobu asks which mode ctrl-a should use the first time you press it. The image answers that question when it
-is built. Ctrl-a is the GNU Screen prefix (option 1), so you never see the question.
-## Why these changes
+The widget never needs more than a few hundred columns of pixels, so the build shrinks the big photos with
+`shrink-jpeg.sh`: photos 3000 pixels wide or more to a quarter of their size, and photos 1500 pixels wide or more to
+half. That cuts the wallpapers from about 95 MB to 23 MB. The build fails if fewer than 150 wallpapers are
+installed.
 
-This image changes how Hollywood runs in several ways. Each change has a reason.
+To run just one of these widgets, use `jp2a` or `map` as the last part of the path:
+
+```sh
+docker run -it --rm --entrypoint /opt/hollywood/lib/hollywood/jp2a mapitman/hollywood-directors-cut
+docker run -it --rm --entrypoint /opt/hollywood/lib/hollywood/map mapitman/hollywood-directors-cut
+```
+
+### Patch to Hollywood
+
+The Docker build applies one patch, and the patch must match Hollywood's code exactly. If a new Hollywood changes
+the code around the patch, the build fails, so a broken launcher can never end up in the image.
+
+- `launcher.patch`: the Hollywood launcher picks one random pane for each split. When tmux refuses the split because
+  that pane is too small, the launcher does not retry, so you get fewer panes than requested. The patch makes the
+  launcher try every pane in random order, in both directions, until one has room. After the launcher builds the
+  panes, the patch also runs `even-layout.sh`, which gives an even number of panes the same size. The patch also adds
+  a notice to the launcher that says it was modified, as the Apache License asks.
+
+### Byobu ctrl-a
+
+Byobu asks which mode ctrl-a should use the first time you press it. The image answers that question when it is
+built. Ctrl-a is the GNU Screen prefix (option 1), so you never see the question.
+
+### Build and run locally
+
+```sh
+just build
+just run
+```
+
+`just build` tags the image with both of its names, `mapitman/hollywood-directors-cut` and `mapitman/hollywood`.
+`just run` names the container `hollywood`, so you can stop it with `docker stop hollywood`.
+
+## 🎙️ Director's commentary
+
+Why each scene was cut the way it was. Each change has a reason.
 
 - **Debian stable base.** `debian:trixie-slim` is a named release, so the base does not change between builds
   except for security fixes. It has every tool the widgets need, including `mplayer`.
@@ -205,15 +248,15 @@ This image changes how Hollywood runs in several ways. Each change has a reason.
     A pane that lasts 30 to 45 seconds shows at least half.
   - The `code` widget shows each file for 2 seconds and the `bat` widget for 3, so 10 seconds is only a few files.
 - **Panes change one at a time.** Hollywood replaces all panes at the same moment, so you cannot finish reading one
-  before it disappears. The widget guard gives each pane its own random time between the delay and 1.5 times the delay,
-  then swaps the widget inside the pane. Swapping does not rebuild the window. The launcher's own refresh now runs
-  only every 10 minutes, so the pane layout still changes now and then.
+  before it disappears. The widget guard gives each pane its own random time between the delay and 1.5 times the
+  delay, then swaps the widget inside the pane. Swapping does not rebuild the window. The launcher's own refresh now
+  runs only every 10 minutes, so the pane layout still changes now and then.
 - **Launcher patch.** The launcher picks one random pane per split and never retries. When that pane was too small,
   tmux refused the split and the window ended up with fewer panes than requested. At 161x37, 2 of 8 launches gave
   3 panes instead of 4.
-- **Widget size guard.** Some widgets keep running in a pane that is too small and show a message instead of content:
-  `atop` asks for 60 x 24, and `bmon` asks you to enlarge the window. At 161x37 the largest panes are 18 rows tall.
-  A pane also shrinks while the launcher splits later panes, so the guard checks again on every resize.
+- **Widget size guard.** Some widgets keep running in a pane that is too small and show a message instead of
+  content: `atop` asks for 60 x 24, and `bmon` asks you to enlarge the window. At 161x37 the largest panes are
+  18 rows tall. A pane also shrinks while the launcher splits later panes, so the guard checks again on every resize.
 - **No repeated widgets.** The launcher picks the first widget separately from the rest, so two panes can start
   with the same widget. The guard keeps one widget per pane, both at the start and when panes swap.
 - **Wallpapers and a new viewer for the `jp2a` widget.** The image had one JPEG of its own, so the widget showed
@@ -236,10 +279,16 @@ This image changes how Hollywood runs in several ways. Each change has a reason.
 - **Terminal reset on exit.** `cmatrix` and `mplayer` hide the cursor, switch to the alternate screen and turn on
   mouse reporting. They cannot undo this when the container stops, so the terminal had no cursor afterward.
 - **Man pages and docs restored.** The slim image removes them, and the `man` and `code` widgets need them.
+- **Two image names.** The project is now called Hollywood: Director's Cut, so the image is
+  `mapitman/hollywood-directors-cut`. Docker Hub has no alias feature, so the same image is also published as
+  `mapitman/hollywood`, and commands that use the old name keep working.
 
-## License
+## 🏆 Credits
+
+Written by Dustin Kirkland. Re-edited by Mark Pitman. Wallpapers from the KDE Plasma set, by way of Debian. No
+terminals were harmed in the making of this image. 🎬
 
 The files in this repository are licensed under the MIT license (see `LICENSE`). Hollywood is licensed under the
-Apache License 2.0 (Copyright 2014 Dustin Kirkland), and the wallpapers are GPL-2+. `THIRD-PARTY.md` lists each
-part that comes from another project, its license, and what this project changed. The image carries the same
-files in `/usr/share/doc/hollywood`.
+Apache License 2.0 (Copyright 2014 Dustin Kirkland), and the wallpapers are GPL-2+. `THIRD-PARTY.md` lists each part
+that comes from another project, its license, and what this project changed. The image carries the same files in
+`/usr/share/doc/hollywood`.
