@@ -10,7 +10,7 @@
  └──────────────────────────────────────────────────┘
 ```
 
-*The terminal that makes you look like you are hacking the mainframe. Re-edited. No studio notes.*
+*The terminal that makes you look like you are hacking the Gibson. Re-edited. No studio notes.*
 
 *🎟️ Rated T for Terminal. Contains falling green letters and mild technobabble.*
 
