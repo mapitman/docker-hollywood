@@ -8,6 +8,11 @@
 # so every cell shows two pixels, and each picture stays for a few seconds.
 #
 #   HOLLYWOOD_IMAGE_SECONDS  seconds to show each picture (default 3)
+#
+# Based on the widget of the same name in Hollywood
+# (https://github.com/dustinkirkland/hollywood), Copyright 2014 Dustin Kirkland,
+# licensed under the Apache License 2.0. The changes are by the docker-hollywood
+# project and are licensed under the MIT license. See LICENSE and THIRD-PARTY.md.
 
 command -v python3 >/dev/null 2>&1 || exit 1
 trap "pkill -f -9 lib/hollywood/ >/dev/null 2>&1; exit" INT

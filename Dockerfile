@@ -26,13 +26,22 @@ RUN apt-get update \
 # Debian stable package is version 1.21, which has broken widgets and a launcher
 # that loses the -s and -d options. The layout matches the Debian package:
 # launcher in /usr/games, widgets in /usr/lib/hollywood, data in /usr/share.
+# Hollywood is licensed under the Apache License 2.0. A package would install its
+# copyright file, so install it here too and link the license text that Debian keeps.
 ADD https://github.com/dustinkirkland/hollywood.git#4bfa29772a6e2f1e4aecbd3e26fde7dc69cce6eb /usr/src/hollywood
 RUN install -D -m 755 /usr/src/hollywood/bin/hollywood /usr/games/hollywood \
     && mkdir -p /usr/lib /usr/share/man/man1 \
     && cp -a /usr/src/hollywood/lib/hollywood /usr/lib/hollywood \
     && cp -a /usr/src/hollywood/share/hollywood /usr/share/hollywood \
     && install -m 644 /usr/src/hollywood/share/man/man1/hollywood.1 /usr/share/man/man1/hollywood.1 \
+    && install -D -m 644 /usr/src/hollywood/debian/copyright /usr/share/doc/hollywood/copyright \
+    && ln -s /usr/share/common-licenses/Apache-2.0 /usr/share/doc/hollywood/LICENSE \
     && rm -rf /usr/src/hollywood
+
+# The licenses of this project and of the software in the image: the notice file
+# lists everything that comes from other projects and what was changed.
+COPY THIRD-PARTY.md /usr/share/doc/hollywood/THIRD-PARTY.md
+COPY LICENSE /usr/share/doc/hollywood/LICENSE-docker-hollywood
 
 # The jp2a widget draws every JPEG file it finds under /usr, and the image has
 # only one of its own. Add the wallpapers from the KDE Plasma package. Only the

@@ -156,6 +156,7 @@ it patches.
   because that pane is too small, the launcher does not retry, so you get fewer panes than requested. The patch
   makes the launcher try every pane in random order, in both directions, until one has room. After the launcher
   builds the panes, the patch also runs `even-layout.sh`, which gives an even number of panes the same size.
+  The patch also adds a notice to the launcher that says it was modified, as the Apache License asks.
 
 ## The mplayer widget
 
@@ -235,3 +236,10 @@ This image changes how Hollywood runs in several ways. Each change has a reason.
 - **Terminal reset on exit.** `cmatrix` and `mplayer` hide the cursor, switch to the alternate screen and turn on
   mouse reporting. They cannot undo this when the container stops, so the terminal had no cursor afterward.
 - **Man pages and docs restored.** The slim image removes them, and the `man` and `code` widgets need them.
+
+## License
+
+The files in this repository are licensed under the MIT license (see `LICENSE`). Hollywood is licensed under the
+Apache License 2.0 (Copyright 2014 Dustin Kirkland), and the wallpapers are GPL-2+. `THIRD-PARTY.md` lists each
+part that comes from another project, its license, and what this project changed. The image carries the same
+files in `/usr/share/doc/hollywood`.

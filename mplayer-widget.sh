@@ -10,6 +10,11 @@
 #   HOLLYWOOD_MPLAYER_SPEED    playback speed, 1 is normal (default 0.75)
 #   HOLLYWOOD_MPLAYER_FILTERS  video filter that crops the video to the rows
 #                              where the waveform is (default crop=128:64:0:16)
+#
+# Based on the widget of the same name in Hollywood
+# (https://github.com/dustinkirkland/hollywood), Copyright 2014 Dustin Kirkland,
+# licensed under the Apache License 2.0. The changes are by the docker-hollywood
+# project and are licensed under the MIT license. See LICENSE and THIRD-PARTY.md.
 
 command -v mplayer >/dev/null 2>&1 || exit 1
 command -v python3 >/dev/null 2>&1 || exit 1
