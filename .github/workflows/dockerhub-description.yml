@@ -1,0 +1,50 @@
+name: Update Docker Hub description
+
+# The image is published under two names, and each name is its own repository on
+# Docker Hub with its own description. This workflow copies the README into both
+# repositories whenever the README changes on main. You can also run it by hand.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - README.md
+      - .github/workflows/dockerhub-description.yml
+
+jobs:
+  description:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - repository: mapitman/hollywood-directors-cut
+            short: "Hollywood: Director's Cut. The hacking-movie terminal, in a container, fitted to your screen."
+            notice: ""
+          - repository: mapitman/hollywood
+            short: "Same image as mapitman/hollywood-directors-cut: Hollywood, re-edited, in a container."
+            notice: "> **This is the same image as [mapitman/hollywood-directors-cut](https://hub.docker.com/r/mapitman/hollywood-directors-cut).** The project is now called Hollywood: Director's Cut. Both names are kept up to date, so commands that use this name keep working."
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build the description
+        env:
+          NOTICE: ${{ matrix.notice }}
+        run: |
+          if [ -n "$NOTICE" ]; then
+            printf '%s\n\n' "$NOTICE" > description.md
+          else
+            : > description.md
+          fi
+          cat README.md >> description.md
+
+      - name: Update the Docker Hub repository
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ matrix.repository }}
+          short-description: ${{ matrix.short }}
+          readme-filepath: description.md
