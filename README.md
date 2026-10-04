@@ -207,8 +207,8 @@ docker run -it --rm --entrypoint /opt/hollywood/lib/hollywood/map mapitman/holly
 
 ### Patch to Hollywood
 
-The Docker build applies one patch with no fuzz, so the build fails if a new Hollywood source changes the code it
-patches.
+The Docker build applies one patch, and the patch must match Hollywood's code exactly. If a new Hollywood changes
+the code around the patch, the build fails, so a broken launcher can never end up in the image.
 
 - `launcher.patch`: the Hollywood launcher picks one random pane for each split. When tmux refuses the split because
   that pane is too small, the launcher does not retry, so you get fewer panes than requested. The patch makes the

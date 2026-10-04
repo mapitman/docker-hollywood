@@ -88,9 +88,9 @@ RUN byobu-ctrl-a screen
 # The stock launcher gives up on a pane when tmux refuses a split because the
 # chosen pane is too small, so you sometimes get fewer panes than requested. It
 # also leaves the panes at uneven sizes. The launcher patch retries other panes
-# and arranges an even number of panes in a grid of equal sizes. The patch applies
-# with no fuzz, so the build fails if the Hollywood source changes the code it
-# patches.
+# and arranges an even number of panes in a grid of equal sizes. --fuzz=0 makes
+# patch require an exact match with the code around each change, so the build
+# fails if the Hollywood source changes that code.
 COPY launcher.patch /tmp/launcher.patch
 COPY --chmod=755 even-layout.sh /usr/local/bin/hollywood-layout
 RUN apt-get update \
