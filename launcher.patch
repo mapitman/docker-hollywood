@@ -1,0 +1,59 @@
+This patch changes bin/hollywood from Hollywood 1.25, which is licensed under the
+Apache License 2.0 (Copyright 2014 Dustin Kirkland). It is a modification of that
+file, and it adds a notice to the file saying so. The changes are:
+
+  - A split that tmux refuses is tried again in other panes, in both directions.
+  - After the panes are built, /usr/local/bin/hollywood-layout (even-layout.sh in
+    this repository) runs, which gives an even number of panes the same size.
+
+The changes in this patch are licensed under the MIT license of this repository.
+The lines of Hollywood that it shows as context stay under the Apache License 2.0.
+See THIRD-PARTY.md.
+
+--- a/hollywood
++++ b/hollywood
+@@ -16,6 +16,10 @@
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
++#
++# Modified for docker-hollywood (https://github.com/mapitman/docker-hollywood):
++# a split that tmux refuses is tried again in other panes, and an even number of
++# panes is arranged in a grid of equal sizes. See launcher.patch in that project.
+ 
+ PKG="hollywood"
+ # Improved cleanup: kill the tmux session and all child processes
+@@ -38,17 +42,28 @@
+ 	sleep 0.5
+ 	for w in $(ls "$WIDGET_DIR" | sort -R); do
+ 		[ "$dir" = "-v" ] && dir="-h" || dir="-v"
+-		panes=$(tmux list-panes -t $PKG 2>/dev/null)
+-		# Allow for failed widgets
+-		splits=$(echo "$panes" | wc -l)
+-		pane=$((RANDOM % $splits))
+-		tmux split-window $dir -t ${PKG}.$pane "nice -n 19 $WIDGET_DIR/$w" >/dev/null 2>&1
++		panes=$(tmux list-panes -t $PKG -F '#{pane_id}' 2>/dev/null | sort -R)
++		# Try each pane in random order, in both directions, until one has room.
++		placed=
++		for pane in $panes; do
++			for d in "$dir" -v -h; do
++				if tmux split-window $d -t "$pane" "nice -n 19 $WIDGET_DIR/$w" >/dev/null 2>&1; then
++					placed=1
++					break
++				fi
++			done
++			[ -n "$placed" ] && break
++		done
+ 		sleep 0.2
++		# No pane has room for another split.
++		[ -n "$placed" ] || break
+ 		split=$((split+1))
+ 		if [ $split -ge $SPLITS ]; then
+ 			break
+ 		fi
+ 	done
++	# Make the panes the same size when there is an even number of them.
++	/usr/local/bin/hollywood-layout "$PKG"
+ }
+ 
+ WIDGET_DIR="$(dirname $0)/../lib/$PKG"
