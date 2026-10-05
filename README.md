@@ -10,9 +10,11 @@
  └──────────────────────────────────────────────────┘
 ```
 
-*The terminal that makes you look like you are hacking the mainframe. Re-edited. No studio notes.*
+*The terminal that makes you look like you are [hacking the Gibson](https://en.wikipedia.org/wiki/Hackers_%28film%29). Re-edited. No studio notes.*
 
 *🎟️ Rated T for Terminal. Contains falling green letters and mild technobabble.*
+
+*🦖 Bystanders will say: ["It's a UNIX system, I know this!"](https://www.youtube.com/watch?v=JOeY07qKU9c)*
 
 [Hollywood](https://github.com/dustinkirkland/hollywood) fills your terminal with busy technobabble: `htop` here,
 falling green letters there, a world map for good measure. The Director's Cut is the same movie in a container, with
