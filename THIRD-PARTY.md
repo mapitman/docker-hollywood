@@ -24,6 +24,8 @@ The image carries a copy of this file at `/usr/share/doc/hollywood/THIRD-PARTY.m
 - **Three widgets are replaced:** `mplayer`, `jp2a` and `map`. They are `mplayer-widget.sh`, `image-widget.sh` and
   `map-widget.sh`, with the renderers `soundwave-render.py` and `image-render.py`. Each script says it is based on
   the Hollywood widget it replaces.
+- **One widget is added:** `btop`, in `btop-widget.sh`. Hollywood has no `btop` widget, so this is new and replaces
+  nothing. `btop` itself is a Debian package that is licensed under the Apache License 2.0.
 - **Everything else is unchanged:** the other widgets and the bundled `map.jpg` and `soundwave.mp4` are used as they are.
 
 ### Files in this repository that come from Hollywood
@@ -44,6 +46,6 @@ MIT license. The other files here, such as `entrypoint.sh`, `widget-guard.sh`, `
 
 ## Debian base image and packages
 
-The image starts from `debian:trixie-slim` and installs packages with `apt` (tmux, byobu, mplayer, atop, htop,
+The image starts from `debian:trixie-slim` and installs packages with `apt` (tmux, byobu, mplayer, atop, htop, btop,
 bmon, cmatrix, figlet and others). Each package's license is in `/usr/share/doc/<package>/copyright` in the
 image, and its source is available with `apt-get source <package>`.
