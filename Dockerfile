@@ -16,7 +16,7 @@ RUN rm -f /etc/dpkg/dpkg.cfg.d/docker* \
 RUN apt-get update \
     && apt-get -y install --no-install-recommends \
         byobu tmux procps ncurses-term \
-        apg atop bat bmon bsdextrautils ccze cmatrix figlet htop \
+        apg atop bat bmon bsdextrautils btop ccze cmatrix figlet htop \
         man-db manpages moreutils mplayer openssh-client pv python3 python3-pil python3-pygments \
         speedometer tree \
     && apt-get -y --reinstall install coreutils findutils \
@@ -80,6 +80,9 @@ COPY --chmod=755 soundwave-render.py /usr/local/bin/hollywood-soundwave-render
 COPY --chmod=755 image-widget.sh /usr/lib/hollywood/jp2a
 COPY --chmod=755 map-widget.sh /usr/lib/hollywood/map
 COPY --chmod=755 image-render.py /usr/local/bin/hollywood-image-render
+
+# Add a btop widget. Hollywood has none. It needs btop, which is in the package list above.
+COPY --chmod=755 btop-widget.sh /usr/lib/hollywood/btop
 
 # Byobu asks which mode ctrl-a should use the first time you press it. Choose
 # GNU Screen mode (option 1) now so the question never appears.

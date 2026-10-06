@@ -53,16 +53,18 @@ The original runs. This cut runs better.
   blocks, so every cell shows two pixels. There are no random letters and nothing scrolls. The image brings 171
   wallpapers, from the KDE Plasma set.
 - 💺 **No bad seats.** A widget that needs more room than its pane has is swapped for one that fits.
-- 📌 **A fixed set.** The base is Debian 13 (stable), and Hollywood 1.25 comes from a pinned upstream commit. All 20
+- 📌 **A fixed set.** The base is Debian 13 (stable), and Hollywood 1.25 comes from a pinned upstream commit. All 21
   widgets work.
 - 🧹 **It cleans up.** Your terminal is reset when the show ends, and Byobu never asks about ctrl-a.
+- 📊 **One more widget.** `btop` joins the cast. It shows the CPU, memory, network and processes, and it shrinks to just
+  the CPU box when its pane is small.
 
 The details are in "Behind the scenes". The reasons are in "Director's commentary".
 
 ## 🎭 The cast
 
 Hollywood opens a tmux session and fills it with panes. Each pane runs one widget, which wraps an ordinary tool.
-There are 20 widgets. All of them play themselves.
+There are 21 widgets. All of them play themselves.
 
 | Widget | Shows |
 |---|---|
@@ -70,6 +72,7 @@ There are 20 widgets. All of them play themselves.
 | `atop` | system and process monitor (needs 60 x 24) |
 | `bat` | random source files from `/usr`, syntax highlighted with `batcat` |
 | `bmon` | network bandwidth monitor (needs 48 x 26, or 141 x 18) |
+| `btop` | resource monitor with CPU, memory, network and process boxes (needs 60 x 8, see "The btop widget") |
 | `cmatrix` | falling green characters, as in The Matrix |
 | `code` | random C, C++, Java and Python files, highlighted with `pygmentize` |
 | `errno` | the list of error codes, in random order |
@@ -102,6 +105,7 @@ Every setting is an environment variable, because even directors take notes.
 | Playback speed of the `mplayer` widget (`0.5` is calmer, `1` is normal speed) | `HOLLYWOOD_MPLAYER_SPEED` | `0.75` |
 | Crop filter for the `mplayer` widget (`scale` shows the whole video) | `HOLLYWOOD_MPLAYER_FILTERS` | `crop=128:64:0:16` |
 | Seconds the `jp2a` widget shows each picture | `HOLLYWOOD_IMAGE_SECONDS` | `3` |
+| Milliseconds between updates of the `btop` widget (`btop` accepts 100 or more) | `HOLLYWOOD_BTOP_UPDATE_MS` | `100` |
 
 ```sh
 docker run -it --rm -e HOLLYWOOD_CELLS_PER_PANE=1000 -e HOLLYWOOD_DELAY=60 mapitman/hollywood-directors-cut
@@ -148,6 +152,7 @@ guard stops the widget and starts a different one that fits.
 |---|---|
 | `atop` | 60 x 24 |
 | `bmon` | 48 x 26, or 141 x 18 (it asks you to enlarge the window below this) |
+| `btop` | 60 x 8 (all four boxes need 80 x 24) |
 | `figlet` | 57 x 7 |
 | `sshart` | 20 x 12 |
 
@@ -162,6 +167,26 @@ No two panes run the same widget. Each running widget holds a claim in `/tmp/hol
 starts or switches picks a widget that nobody else holds. If no unused widget fits in a new pane, the pane closes
 instead of repeating a widget. This only happens with many small panes (for example, 16 panes on a 320x90
 terminal). When a pane is ready to swap and no other widget is free, it keeps its current widget.
+
+### The btop widget
+
+Hollywood has no `btop` widget, so the image adds one (`btop-widget.sh`). `btop` shows four boxes: the CPU, the
+memory, the network and the processes. All four need a pane of at least 80 columns by 24 lines. A smaller pane
+gets only the CPU box, which fits down to 60 columns by 8 lines. At 161 x 37 the panes are about 80 x 17, so
+they show the CPU box. `btop` updates every 2000 ms by default, and the widget sets 100 ms, the fastest that `btop` allows, so the graphs
+move smoothly.
+
+The widget picks the boxes from the pane size when it starts. If you resize the pane across the 80 x 24 edge, it
+starts `btop` again with the boxes that fit. When the widget guard stops it, the widget puts your terminal back the
+way it was, because `btop` does not do that itself.
+
+To run just this widget:
+
+```sh
+docker run -it --rm --entrypoint /opt/hollywood/lib/hollywood/btop mapitman/hollywood-directors-cut
+```
+
+Press `q` to leave `btop`. The widget then starts it again, so press ctrl-c to stop the widget.
 
 ### The mplayer widget
 
@@ -240,7 +265,7 @@ Why each scene was cut the way it was. Each change has a reason.
 - **Debian stable base.** `debian:trixie-slim` is a named release, so the base does not change between builds
   except for security fixes. It has every tool the widgets need, including `mplayer`.
 - **Hollywood from the upstream source.** The Dockerfile fetches the commit tagged `1.25` (`4bfa297`), so the
-  Hollywood scripts do not change between builds. This version has all 20 widgets. Its launcher passes the values of
+  Hollywood scripts do not change between builds. This version has all 21 widgets. Its launcher passes the values of
   `-s` and `-d` to its own tmux session, which the entrypoint needs. Its `sshart` widget works with current OpenSSH.
 - **Pane count from terminal size.** Hollywood defaults to two panes per CPU. On an 8-CPU machine that is
   16 panes, which are too small to read on a 1920x1080 screen. The entrypoint sizes the count to the terminal.
@@ -267,6 +292,12 @@ Why each scene was cut the way it was. Each change has a reason.
   changes pictures twice a second, which is too fast to see them. The new viewer draws each picture in 256 colors
   with half blocks, the same way as the new `mplayer` widget, and keeps it for 3 seconds. The `map` widget printed
   its picture again every second, so its pane scrolled all the time. It now draws the map once with the same viewer.
+- **A `btop` widget.** Hollywood has no widget for `btop`, a monitor that looks more modern than `htop` and `atop`.
+  `btop` needs 80 x 24 for its four boxes, and the panes of a 1080p screen are about 80 x 17, so a plain `btop` would
+  almost never fit. With only the CPU box it fits in 60 x 8, so the widget shows that box in small panes and all
+  four boxes in big ones. It also updates twenty times as fast as `btop` does by default: every 100 ms, the fastest that `btop` allows, and
+  not every 2000 ms. Counting tmux, which draws the faster updates, that costs about 3% of one core in a normal pane and 11% in a
+  very large one, and 6 MB of memory.
 - **A new `mplayer` widget.** Hollywood plays the sound-wave video at 100 times normal speed. In a 100 x 18 pane
   that redraws the terminal about 950 times a second, which flickers. It also draws the video with libcaca, which
   puts a random-looking letter on every cell, and the letters change on every frame. libcaca has no setting for
