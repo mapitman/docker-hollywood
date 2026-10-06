@@ -105,7 +105,7 @@ Every setting is an environment variable, because even directors take notes.
 | Playback speed of the `mplayer` widget (`0.5` is calmer, `1` is normal speed) | `HOLLYWOOD_MPLAYER_SPEED` | `0.75` |
 | Crop filter for the `mplayer` widget (`scale` shows the whole video) | `HOLLYWOOD_MPLAYER_FILTERS` | `crop=128:64:0:16` |
 | Seconds the `jp2a` widget shows each picture | `HOLLYWOOD_IMAGE_SECONDS` | `3` |
-| Milliseconds between updates of the `btop` widget (`btop` accepts 100 or more) | `HOLLYWOOD_BTOP_UPDATE_MS` | `500` |
+| Milliseconds between updates of the `btop` widget (`btop` accepts 100 or more) | `HOLLYWOOD_BTOP_UPDATE_MS` | `100` |
 
 ```sh
 docker run -it --rm -e HOLLYWOOD_CELLS_PER_PANE=1000 -e HOLLYWOOD_DELAY=60 mapitman/hollywood-directors-cut
@@ -173,8 +173,8 @@ terminal). When a pane is ready to swap and no other widget is free, it keeps it
 Hollywood has no `btop` widget, so the image adds one (`btop-widget.sh`). `btop` shows four boxes: the CPU, the
 memory, the network and the processes. All four need a pane of at least 80 columns by 24 lines. A smaller pane
 gets only the CPU box, which fits down to 60 columns by 8 lines. At 161 x 37 the panes are about 80 x 17, so
-they show the CPU box. `btop` updates every 2000 ms by default, and the widget sets 500 ms so the graphs move
-faster.
+they show the CPU box. `btop` updates every 2000 ms by default, and the widget sets 100 ms, the fastest that `btop` allows, so the graphs
+move smoothly.
 
 The widget picks the boxes from the pane size when it starts. If you resize the pane across the 80 x 24 edge, it
 starts `btop` again with the boxes that fit. When the widget guard stops it, the widget puts your terminal back the
@@ -295,8 +295,9 @@ Why each scene was cut the way it was. Each change has a reason.
 - **A `btop` widget.** Hollywood has no widget for `btop`, a monitor that looks more modern than `htop` and `atop`.
   `btop` needs 80 x 24 for its four boxes, and the panes of a 1080p screen are about 80 x 17, so a plain `btop` would
   almost never fit. With only the CPU box it fits in 60 x 8, so the widget shows that box in small panes and all
-  four boxes in big ones. It also updates four times as fast as `btop` does by default, every 500 ms and not every
-2000 ms. It costs little: about 0.4% to 1% of one core and 6 MB of memory.
+  four boxes in big ones. It also updates twenty times as fast as `btop` does by default: every 100 ms, the fastest that `btop` allows, and
+  not every 2000 ms. Counting tmux, which draws the faster updates, that costs about 3% of one core in a normal pane and 11% in a
+  very large one, and 6 MB of memory.
 - **A new `mplayer` widget.** Hollywood plays the sound-wave video at 100 times normal speed. In a 100 x 18 pane
   that redraws the terminal about 950 times a second, which flickers. It also draws the video with libcaca, which
   puts a random-looking letter on every cell, and the letters change on every frame. libcaca has no setting for

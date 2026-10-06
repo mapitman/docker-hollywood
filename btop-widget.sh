@@ -6,7 +6,7 @@
 # pane changes size across that edge, the widget starts btop again with the boxes
 # that fit.
 #
-#   HOLLYWOOD_BTOP_UPDATE_MS  milliseconds between updates of btop (default 500)
+#   HOLLYWOOD_BTOP_UPDATE_MS  milliseconds between updates of btop (default 100)
 #
 # This widget was written for hollywood-directors-cut and is licensed under the MIT
 # license. It follows the pattern of the widgets in Hollywood. See LICENSE and
@@ -14,10 +14,10 @@
 
 command -v btop >/dev/null 2>&1 || exit 1
 
-# btop updates every 2000 ms unless told otherwise, which is slow to watch. It does
-# not accept less than 100 ms.
-update=${HOLLYWOOD_BTOP_UPDATE_MS:-500}
-case "$update" in '' | *[!0-9]*) update=500 ;; esac
+# btop updates every 2000 ms unless told otherwise, which is slow to watch. Use the
+# fastest rate that btop allows, 100 ms. It does not accept less.
+update=${HOLLYWOOD_BTOP_UPDATE_MS:-100}
+case "$update" in '' | *[!0-9]*) update=100 ;; esac
 [ "$update" -lt 100 ] && update=100
 
 # btop does not clean up when it is stopped with TERM, which is how the widget guard
