@@ -22,6 +22,10 @@ the footage re-edited so that it looks better on your screen.
 
 The original script is by Dustin Kirkland. This cut is a new edit of it.
 
+![The Director's Cut: four to six panes of widgets, each running on its own timer](docs/hollywood-directors-cut.webp)
+
+*🎞️ The trailer: thirty seconds of the Director's Cut.*
+
 ## 🍿 Now showing
 
 ```sh
