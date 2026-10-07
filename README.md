@@ -44,8 +44,8 @@ Docker ends the container with no chance to clean up. If your cursor is missing 
 
 The original runs. This cut runs better.
 
-- 🖥️ **It fits your screen.** The number of panes follows the size of your terminal, and an even number of panes are
-  all the same size. The original makes two panes per CPU, which is 16 panes on an 8-CPU machine.
+- 🖥️ **It fits your screen.** The size of your terminal sets the most panes you can get, each run picks a random number up to that
+  maximum, and an even number of panes are all the same size. The original makes two panes per CPU, which is 16 panes on an 8-CPU machine.
 - ⏱️ **Every pane has its own schedule.** Each pane changes its widget at its own time, 30 to 45 seconds after the
   last change, and no two panes show the same widget. Every 10 minutes the whole window is cut again with a new
   layout.
@@ -99,7 +99,8 @@ Every setting is an environment variable, because even directors take notes.
 
 | Setting | Environment variable | Default |
 |---|---|---|
-| Cells per pane | `HOLLYWOOD_CELLS_PER_PANE` | `1400` |
+| Cells per pane (this sets the maximum pane count) | `HOLLYWOOD_CELLS_PER_PANE` | `1400` |
+| Pick a random pane count up to the maximum (`0` always uses the maximum) | `HOLLYWOOD_RANDOM_PANES` | `1` |
 | Minimum seconds a pane keeps a widget (the maximum is 1.5 times this) | `HOLLYWOOD_DELAY` | `30` |
 | Seconds between layout rebuilds (`0` turns the rebuild off) | `HOLLYWOOD_REBUILD` | `600` |
 | Playback speed of the `mplayer` widget (`0.5` is calmer, `1` is normal speed) | `HOLLYWOOD_MPLAYER_SPEED` | `0.75` |
@@ -126,9 +127,10 @@ How the movie gets made.
 ### Pane count and widget time
 
 The entrypoint script sizes the number of panes to your terminal. Docker passes the terminal size in character
-cells, so the script divides the cell count by 1400. The result is limited to two panes per CPU and to the number of
-widgets, with a minimum of 2. A 161x37 terminal (a full-screen terminal at 1920x1080 with a typical font) gives
-4 panes.
+cells, so the script divides the cell count by 1400. The result is the maximum number of panes. It is limited to two panes
+per CPU and to the number of widgets. Each run picks a random number of panes from 2 up to that maximum, so some runs
+have fewer and larger panes, and the widgets that need a big pane can run. A 161x37 terminal (a full-screen terminal
+at 1920x1080 with a typical font) has a maximum of 4 panes. Set `HOLLYWOOD_RANDOM_PANES=0` to always use the maximum.
 
 Each pane keeps its widget for 30 to 45 seconds, then swaps in another unused widget. Every pane picks its own time,
 so the panes change at different moments. Every 10 minutes the window is rebuilt: one pane stays, the others are

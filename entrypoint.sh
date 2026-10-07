@@ -2,11 +2,15 @@
 # Size the Hollywood pane count to the terminal, then start Hollywood.
 #
 # Docker passes the terminal size in character cells, not pixels. The pane
-# count is the number of cells divided by HOLLYWOOD_CELLS_PER_PANE, limited to
-# two panes per CPU and to the number of widgets, and at least 2. A 161x37 terminal (about
-# 1920x1080 with a typical font) gives 4 panes with the default of 1400 cells per pane.
+# maximum is the number of cells divided by HOLLYWOOD_CELLS_PER_PANE, limited to
+# two panes per CPU and to the number of widgets. The script picks a random
+# count from 2 up to that maximum, so fewer and larger panes appear some of
+# the time, and the widgets that need a big pane can run. A 161x37 terminal
+# (about 1920x1080 with a typical font) has a maximum of 4 panes with the
+# default of 1400 cells per pane.
 #
 #   HOLLYWOOD_CELLS_PER_PANE  cells per pane (default 1400)
+#   HOLLYWOOD_RANDOM_PANES    0 always uses the maximum (default 1)
 #   HOLLYWOOD_DELAY           minimum seconds a pane keeps a widget (default 30)
 #   HOLLYWOOD_REBUILD         seconds between layout rebuilds (default 600, 0 = never)
 #
@@ -42,6 +46,9 @@ pane_count() {
 	[ "$panes" -gt "$widget_cap" ] && panes=$widget_cap
 	# The launcher always creates at least 2 panes, even with -s 1.
 	[ "$panes" -lt 2 ] && panes=2
+	if [ "${HOLLYWOOD_RANDOM_PANES:-1}" != 0 ]; then
+		panes=$((2 + RANDOM % (panes - 1)))
+	fi
 	echo "$panes"
 }
 
