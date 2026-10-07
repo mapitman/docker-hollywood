@@ -13,7 +13,7 @@
 #   HOLLYWOOD_CELLS_PER_PANE  cells per pane (default 1400)
 #   HOLLYWOOD_RANDOM_PANES    0 always uses the maximum (default 1)
 #   HOLLYWOOD_DELAY           minimum seconds a pane keeps a widget (default 30)
-#   HOLLYWOOD_REBUILD         seconds between layout rebuilds (default 600, 0 = never)
+#   HOLLYWOOD_REBUILD         seconds between layout rebuilds (default 300, 0 = never)
 #
 # Each pane keeps a widget for a random time from the delay to one and a half
 # times the delay, so panes change at different moments. The widget guard does
@@ -56,8 +56,8 @@ case "$DELAY" in ''|*[!0-9]*) DELAY=30 ;; esac
 [ "$DELAY" -lt 2 ] && DELAY=2
 export HOLLYWOOD_DELAY=$DELAY
 
-REBUILD=${HOLLYWOOD_REBUILD:-600}
-case "$REBUILD" in ''|*[!0-9]*) REBUILD=600 ;; esac
+REBUILD=${HOLLYWOOD_REBUILD:-300}
+case "$REBUILD" in ''|*[!0-9]*) REBUILD=300 ;; esac
 [ "$REBUILD" -eq 0 ] && REBUILD=$NO_REFRESH
 
 # The launcher picks a new pane count at every rebuild, unless -s fixes the count.

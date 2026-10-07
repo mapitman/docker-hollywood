@@ -47,7 +47,7 @@ The original runs. This cut runs better.
 - 🖥️ **It fits your screen.** The size of your terminal sets the most panes you can get, each layout picks a random number up to that
   maximum, and an even number of panes are all the same size. The original makes two panes per CPU, which is 16 panes on an 8-CPU machine.
 - ⏱️ **Every pane has its own schedule.** Each pane changes its widget at its own time, 30 to 45 seconds after the
-  last change, and no two panes show the same widget. Every 10 minutes the whole window is cut again with a new
+  last change, and no two panes show the same widget. Every 5 minutes the whole window is cut again with a new
   layout and a new number of panes.
 - 🎨 **A new look for the pictures.** The sound wave, the wallpapers and the world map are drawn in color with half
   blocks, so every cell shows two pixels. There are no random letters and nothing scrolls. The image brings 171
@@ -102,7 +102,7 @@ Every setting is an environment variable, because even directors take notes.
 | Cells per pane (this sets the maximum pane count) | `HOLLYWOOD_CELLS_PER_PANE` | `1400` |
 | Pick a random pane count up to the maximum, at the start and at every rebuild (`0` always uses the maximum) | `HOLLYWOOD_RANDOM_PANES` | `1` |
 | Minimum seconds a pane keeps a widget (the maximum is 1.5 times this) | `HOLLYWOOD_DELAY` | `30` |
-| Seconds between layout rebuilds (`0` turns the rebuild off) | `HOLLYWOOD_REBUILD` | `600` |
+| Seconds between layout rebuilds (`0` turns the rebuild off) | `HOLLYWOOD_REBUILD` | `300` |
 | Playback speed of the `mplayer` widget (`0.5` is calmer, `1` is normal speed) | `HOLLYWOOD_MPLAYER_SPEED` | `0.75` |
 | Crop filter for the `mplayer` widget (`scale` shows the whole video) | `HOLLYWOOD_MPLAYER_FILTERS` | `crop=128:64:0:16` |
 | Seconds the `jp2a` widget shows each picture | `HOLLYWOOD_IMAGE_SECONDS` | `3` |
@@ -133,7 +133,7 @@ have fewer and larger panes, and the widgets that need a big pane can run. A 161
 at 1920x1080 with a typical font) has a maximum of 4 panes. Set `HOLLYWOOD_RANDOM_PANES=0` to always use the maximum.
 
 Each pane keeps its widget for 30 to 45 seconds, then swaps in another unused widget. Every pane picks its own time,
-so the panes change at different moments. Every 10 minutes the window is rebuilt: one pane stays, the others are
+so the panes change at different moments. Every 5 minutes the window is rebuilt: one pane stays, the others are
 replaced, a new number of panes is picked, and the panes are laid out again at random.
 
 ### Same-size panes
@@ -280,7 +280,7 @@ Why each scene was cut the way it was. Each change has a reason.
 - **Panes change one at a time.** Hollywood replaces all panes at the same moment, so you cannot finish reading one
   before it disappears. The widget guard gives each pane its own random time between the delay and 1.5 times the
   delay, then swaps the widget inside the pane. Swapping does not rebuild the window. The launcher's own refresh now
-  runs only every 10 minutes, so the pane layout still changes now and then.
+  runs only every 5 minutes, so the pane layout still changes now and then.
 - **Launcher patch.** The launcher picks one random pane per split and never retries. When that pane was too small,
   tmux refused the split and the window ended up with fewer panes than requested. At 161x37, 2 of 8 launches gave
   3 panes instead of 4.
