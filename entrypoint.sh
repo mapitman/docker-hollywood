@@ -3,11 +3,12 @@
 #
 # Docker passes the terminal size in character cells, not pixels. The pane
 # maximum is the number of cells divided by HOLLYWOOD_CELLS_PER_PANE, limited to
-# two panes per CPU and to the number of widgets. The script picks a random
+# two panes per CPU and to the number of widgets. pane-count.sh picks a random
 # count from 2 up to that maximum, so fewer and larger panes appear some of
-# the time, and the widgets that need a big pane can run. A 161x37 terminal
-# (about 1920x1080 with a typical font) has a maximum of 4 panes with the
-# default of 1400 cells per pane.
+# the time, and the widgets that need a big pane can run. The launcher runs
+# pane-count.sh again at every layout rebuild. A 161x37 terminal (about
+# 1920x1080 with a typical font) has a maximum of 4 panes with the default of
+# 1400 cells per pane.
 #
 #   HOLLYWOOD_CELLS_PER_PANE  cells per pane (default 1400)
 #   HOLLYWOOD_RANDOM_PANES    0 always uses the maximum (default 1)
@@ -25,32 +26,7 @@
 # This cannot run if the container is stopped with "docker kill".
 
 HOLLYWOOD=/usr/games/hollywood
-WIDGET_DIR=/usr/lib/hollywood
-CELLS_PER_PANE=${HOLLYWOOD_CELLS_PER_PANE:-1400}
 DELAY=${HOLLYWOOD_DELAY:-30}
-
-terminal_cells() {
-	local rows cols
-	read -r rows cols < <(stty size 2>/dev/null)
-	rows=${rows:-${LINES:-24}}
-	cols=${cols:-${COLUMNS:-80}}
-	echo $((rows * cols))
-}
-
-pane_count() {
-	local panes=$(($(terminal_cells) / CELLS_PER_PANE))
-	local cpu_cap=$(($(nproc 2>/dev/null || echo 2) * 2))
-	local widget_cap
-	widget_cap=$(ls "$WIDGET_DIR" | wc -l)
-	[ "$panes" -gt "$cpu_cap" ] && panes=$cpu_cap
-	[ "$panes" -gt "$widget_cap" ] && panes=$widget_cap
-	# The launcher always creates at least 2 panes, even with -s 1.
-	[ "$panes" -lt 2 ] && panes=2
-	if [ "${HOLLYWOOD_RANDOM_PANES:-1}" != 0 ]; then
-		panes=$((2 + RANDOM % (panes - 1)))
-	fi
-	echo "$panes"
-}
 
 # The launcher replaces all panes but one every -d seconds, which builds a new
 # random layout. Use that for the slow rebuild, and pass the per-pane delay to
@@ -84,7 +60,11 @@ REBUILD=${HOLLYWOOD_REBUILD:-600}
 case "$REBUILD" in ''|*[!0-9]*) REBUILD=600 ;; esac
 [ "$REBUILD" -eq 0 ] && REBUILD=$NO_REFRESH
 
-[ -z "$has_splits" ] && args+=(-s "$(pane_count)")
+# The launcher picks a new pane count at every rebuild, unless -s fixes the count.
+if [ -z "$has_splits" ]; then
+	args+=(-s "$(/usr/local/bin/hollywood-pane-count)")
+	export HOLLYWOOD_PICK_PANES=1
+fi
 args+=(-d "$REBUILD")
 
 # Run Hollywood as a child, not with exec, so this script can restore the
