@@ -96,6 +96,7 @@ RUN byobu-ctrl-a screen
 # fails if the Hollywood source changes that code.
 COPY launcher.patch /tmp/launcher.patch
 COPY --chmod=755 even-layout.sh /usr/local/bin/hollywood-layout
+COPY --chmod=755 pane-count.sh /usr/local/bin/hollywood-pane-count
 RUN apt-get update \
     && apt-get -y install --no-install-recommends patch \
     && patch --fuzz=0 /usr/games/hollywood /tmp/launcher.patch \

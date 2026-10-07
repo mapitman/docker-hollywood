@@ -5,6 +5,9 @@ file, and it adds a notice to the file saying so. The changes are:
   - A split that tmux refuses is tried again in other panes, in both directions.
   - After the panes are built, /usr/local/bin/hollywood-layout (even-layout.sh in
     this repository) runs, which gives an even number of panes the same size.
+  - When HOLLYWOOD_PICK_PANES is set, every layout rebuild asks
+    /usr/local/bin/hollywood-pane-count (pane-count.sh in this repository) for a
+    new pane count.
 
 The changes in this patch are licensed under the MIT license of this repository.
 The lines of Hollywood that it shows as context stay under the Apache License 2.0.
@@ -12,18 +15,19 @@ See THIRD-PARTY.md.
 
 --- a/hollywood
 +++ b/hollywood
-@@ -16,6 +16,10 @@
+@@ -16,6 +16,11 @@
  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  # See the License for the specific language governing permissions and
  # limitations under the License.
 +#
 +# Modified for hollywood-directors-cut (https://github.com/mapitman/hollywood-directors-cut):
-+# a split that tmux refuses is tried again in other panes, and an even number of
-+# panes is arranged in a grid of equal sizes. See launcher.patch in that project.
++# a split that tmux refuses is tried again in other panes, an even number of
++# panes is arranged in a grid of equal sizes, and a rebuild can pick a new pane
++# count. See launcher.patch in that project.
  
  PKG="hollywood"
  # Improved cleanup: kill the tmux session and all child processes
-@@ -38,17 +42,28 @@
+@@ -38,17 +43,28 @@
  	sleep 0.5
  	for w in $(ls "$WIDGET_DIR" | sort -R); do
  		[ "$dir" = "-v" ] && dir="-h" || dir="-v"
@@ -57,3 +61,12 @@ See THIRD-PARTY.md.
  }
  
  WIDGET_DIR="$(dirname $0)/../lib/$PKG"
+@@ -107,6 +123,8 @@
+ 	i=$((i+1))
+ 	if [ "$((i % DELAY))" = "0" ]; then
+ 		tmux kill-pane -a -t $PKG.bottom-right
++		# Pick a new pane count for the new layout.
++		[ -n "$HOLLYWOOD_PICK_PANES" ] && SPLITS=$(/usr/local/bin/hollywood-pane-count "$PKG")
+ 		spin_up
+ 	fi
+ 	if [ $(tmux list-panes -t $PKG 2>/dev/null | wc -l) -gt 0 ]; then

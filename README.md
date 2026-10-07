@@ -22,6 +22,10 @@ the footage re-edited so that it looks better on your screen.
 
 The original script is by Dustin Kirkland. This cut is a new edit of it.
 
+![The Director's Cut: four to six panes of widgets, each running on its own timer](docs/hollywood-directors-cut.webp)
+
+*🎞️ The trailer: thirty seconds of the Director's Cut.*
+
 ## 🍿 Now showing
 
 ```sh
@@ -44,11 +48,11 @@ Docker ends the container with no chance to clean up. If your cursor is missing 
 
 The original runs. This cut runs better.
 
-- 🖥️ **It fits your screen.** The number of panes follows the size of your terminal, and an even number of panes are
-  all the same size. The original makes two panes per CPU, which is 16 panes on an 8-CPU machine.
+- 🖥️ **It fits your screen.** The size of your terminal sets the most panes you can get, each layout picks a random number up to that
+  maximum, and an even number of panes are all the same size. The original makes two panes per CPU, which is 16 panes on an 8-CPU machine.
 - ⏱️ **Every pane has its own schedule.** Each pane changes its widget at its own time, 30 to 45 seconds after the
-  last change, and no two panes show the same widget. Every 10 minutes the whole window is cut again with a new
-  layout.
+  last change, and no two panes show the same widget. Every 5 minutes the whole window is cut again with a new
+  layout and a new number of panes.
 - 🎨 **A new look for the pictures.** The sound wave, the wallpapers and the world map are drawn in color with half
   blocks, so every cell shows two pixels. There are no random letters and nothing scrolls. The image brings 171
   wallpapers, from the KDE Plasma set.
@@ -99,9 +103,10 @@ Every setting is an environment variable, because even directors take notes.
 
 | Setting | Environment variable | Default |
 |---|---|---|
-| Cells per pane | `HOLLYWOOD_CELLS_PER_PANE` | `1400` |
+| Cells per pane (this sets the maximum pane count) | `HOLLYWOOD_CELLS_PER_PANE` | `1400` |
+| Pick a random pane count up to the maximum, at the start and at every rebuild (`0` always uses the maximum) | `HOLLYWOOD_RANDOM_PANES` | `1` |
 | Minimum seconds a pane keeps a widget (the maximum is 1.5 times this) | `HOLLYWOOD_DELAY` | `30` |
-| Seconds between layout rebuilds (`0` turns the rebuild off) | `HOLLYWOOD_REBUILD` | `600` |
+| Seconds between layout rebuilds (`0` turns the rebuild off) | `HOLLYWOOD_REBUILD` | `300` |
 | Playback speed of the `mplayer` widget (`0.5` is calmer, `1` is normal speed) | `HOLLYWOOD_MPLAYER_SPEED` | `0.75` |
 | Crop filter for the `mplayer` widget (`scale` shows the whole video) | `HOLLYWOOD_MPLAYER_FILTERS` | `crop=128:64:0:16` |
 | Seconds the `jp2a` widget shows each picture | `HOLLYWOOD_IMAGE_SECONDS` | `3` |
@@ -126,13 +131,14 @@ How the movie gets made.
 ### Pane count and widget time
 
 The entrypoint script sizes the number of panes to your terminal. Docker passes the terminal size in character
-cells, so the script divides the cell count by 1400. The result is limited to two panes per CPU and to the number of
-widgets, with a minimum of 2. A 161x37 terminal (a full-screen terminal at 1920x1080 with a typical font) gives
-4 panes.
+cells, so the script divides the cell count by 1400. The result is the maximum number of panes. It is limited to two panes
+per CPU and to the number of widgets. The script `pane-count.sh` picks a random number of panes from 2 up to that maximum, so some layouts
+have fewer and larger panes, and the widgets that need a big pane can run. A 161x37 terminal (a full-screen terminal
+at 1920x1080 with a typical font) has a maximum of 4 panes. Set `HOLLYWOOD_RANDOM_PANES=0` to always use the maximum.
 
 Each pane keeps its widget for 30 to 45 seconds, then swaps in another unused widget. Every pane picks its own time,
-so the panes change at different moments. Every 10 minutes the window is rebuilt: one pane stays, the others are
-replaced, and the panes are laid out again at random.
+so the panes change at different moments. Every 5 minutes the window is rebuilt: one pane stays, the others are
+replaced, a new number of panes is picked, and the panes are laid out again at random.
 
 ### Same-size panes
 
@@ -240,7 +246,8 @@ the code around the patch, the build fails, so a broken launcher can never end u
 - `launcher.patch`: the Hollywood launcher picks one random pane for each split. When tmux refuses the split because
   that pane is too small, the launcher does not retry, so you get fewer panes than requested. The patch makes the
   launcher try every pane in random order, in both directions, until one has room. After the launcher builds the
-  panes, the patch also runs `even-layout.sh`, which gives an even number of panes the same size. The patch also adds
+  panes, the patch also runs `even-layout.sh`, which gives an even number of panes the same size. At every rebuild, the patch
+  asks `pane-count.sh` for a new pane count. The patch also adds
   a notice to the launcher that says it was modified, as the Apache License asks.
 
 ### Byobu ctrl-a
@@ -277,7 +284,7 @@ Why each scene was cut the way it was. Each change has a reason.
 - **Panes change one at a time.** Hollywood replaces all panes at the same moment, so you cannot finish reading one
   before it disappears. The widget guard gives each pane its own random time between the delay and 1.5 times the
   delay, then swaps the widget inside the pane. Swapping does not rebuild the window. The launcher's own refresh now
-  runs only every 10 minutes, so the pane layout still changes now and then.
+  runs only every 5 minutes, so the pane layout still changes now and then.
 - **Launcher patch.** The launcher picks one random pane per split and never retries. When that pane was too small,
   tmux refused the split and the window ended up with fewer panes than requested. At 161x37, 2 of 8 launches gave
   3 panes instead of 4.
