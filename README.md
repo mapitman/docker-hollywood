@@ -20,7 +20,7 @@
 falling green letters there, a world map for good measure. Dustin Kirkland wrote the original. This is my re-edit of
 it, in a container, with the things that bothered me fixed.
 
-![The Director's Cut running: several panes of widgets, each on its own timer](docs/hollywood-directors-cut.webp)
+![The Director's Cut running: several panes of widgets, each on its own timer](https://raw.githubusercontent.com/mapitman/hollywood-directors-cut/main/docs/hollywood-directors-cut.webp)
 
 *Thirty seconds of the Director's Cut.*
 
