@@ -35,6 +35,14 @@ docker run -it --rm mapitman/hollywood-directors-cut
 The image is also published under its old name, `mapitman/hollywood`. Both names are the same image, so old
 commands keep working.
 
+The image runs on both Intel and AMD machines (`linux/amd64`) and on Apple Silicon and other ARM machines
+(`linux/arm64`). Docker picks the right one for your machine.
+
+> 🎬 **Only four panes on a Mac?** Docker on a Mac runs inside a virtual machine, and the number of panes is limited to
+> two per CPU that the machine has. Colima starts with 2 CPUs, which gives at most 4 panes. To give it more, run
+> `colima stop` and then `colima start --cpu 8`. In Docker Desktop, change the CPU setting under Settings, then
+> Resources. To see how many CPUs the container gets, run `docker run --rm debian:trixie-slim nproc`.
+
 To leave the theater, press `<ctrl> - c` until the panes stop spawning, then press `<ctrl> - d` to exit the
 container. You can also stop it from another terminal with `docker stop hollywood` (when you started it with
 `--name hollywood`).
@@ -135,6 +143,9 @@ cells, so the script divides the cell count by 1400. The result is the maximum n
 per CPU and to the number of widgets. The script `pane-count.sh` picks a random number of panes from 2 up to that maximum, so some layouts
 have fewer and larger panes, and the widgets that need a big pane can run. A 161x37 terminal (a full-screen terminal
 at 1920x1080 with a typical font) has a maximum of 4 panes. Set `HOLLYWOOD_RANDOM_PANES=0` to always use the maximum.
+
+The CPU limit counts the CPUs that the container can see, not the CPUs of your computer. On Linux the two numbers are
+the same. On a Mac, Docker runs in a virtual machine, so the container sees only the CPUs that the virtual machine has.
 
 Each pane keeps its widget for 30 to 45 seconds, then swaps in another unused widget. Every pane picks its own time,
 so the panes change at different moments. Every 5 minutes the window is rebuilt: one pane stays, the others are
