@@ -17,14 +17,12 @@
 *🦖 Bystanders will say: ["It's a UNIX system, I know this!"](https://www.youtube.com/watch?v=JOeY07qKU9c)*
 
 [Hollywood](https://github.com/dustinkirkland/hollywood) fills your terminal with busy technobabble: `htop` here,
-falling green letters there, a world map for good measure. The Director's Cut is the same movie in a container, with
-the footage re-edited so that it looks better on your screen.
+falling green letters there, a world map for good measure. Dustin Kirkland wrote the original. This is my re-edit of
+it, in a container, with the things that bothered me fixed.
 
-The original script is by Dustin Kirkland. This cut is a new edit of it.
+![The Director's Cut running: several panes of widgets, each on its own timer](docs/hollywood-directors-cut.webp)
 
-![The Director's Cut: four to six panes of widgets, each running on its own timer](docs/hollywood-directors-cut.webp)
-
-*🎞️ The trailer: thirty seconds of the Director's Cut.*
+*Thirty seconds of the Director's Cut.*
 
 ## 🍿 Now showing
 
@@ -32,43 +30,49 @@ The original script is by Dustin Kirkland. This cut is a new edit of it.
 docker run -it --rm mapitman/hollywood-directors-cut
 ```
 
-The image is also published under its old name, `mapitman/hollywood`. Both names are the same image, so old
-commands keep working.
+The same image is also published as `mapitman/hollywood`, its old name, so old commands keep working.
+
+It runs on Intel and AMD machines (`linux/amd64`) and on ARM machines, Apple Silicon included (`linux/arm64`). Docker
+picks the right one for you.
+
+> 🎬 **Only four panes on a Mac?** Docker on a Mac runs inside a virtual machine, and the pane count is capped at two
+> per CPU that the machine has. Colima starts with 2 CPUs, so you get at most 4 panes. To give it more, run
+> `colima stop` and then `colima start --cpu 8`. In Docker Desktop, change the CPU setting under Settings, then
+> Resources. To see how many CPUs the container gets, run `docker run --rm debian:trixie-slim nproc`.
 
 To leave the theater, press `<ctrl> - c` until the panes stop spawning, then press `<ctrl> - d` to exit the
-container. You can also stop it from another terminal with `docker stop hollywood` (when you started it with
-`--name hollywood`).
+container. You can also stop it from another terminal with `docker stop hollywood`, if you started it with
+`--name hollywood`.
 
-When Hollywood exits, the entrypoint resets your terminal: it shows the cursor, leaves the alternate screen and
-turns off mouse reporting. This also happens after `docker stop`. It cannot happen after `docker kill`, because
-Docker ends the container with no chance to clean up. If your cursor is missing after `docker kill`, run `reset`
-(or `tput cnorm`).
+When Hollywood exits, the entrypoint puts your terminal back: it shows the cursor, leaves the alternate screen and
+turns off mouse reporting. That also happens after `docker stop`. It cannot happen after `docker kill`, because
+Docker gives the container no time to clean up. If your cursor is missing after a `docker kill`, run `reset` (or
+`tput cnorm`).
 
-## ✨ What is new in the Director's Cut
+## ✨ What is different from the original
 
-The original runs. This cut runs better.
+The original works. I wanted it to look better on a big screen and to stop doing a few annoying things, so I changed
+these:
 
-- 🖥️ **It fits your screen.** The size of your terminal sets the most panes you can get, each layout picks a random number up to that
-  maximum, and an even number of panes are all the same size. The original makes two panes per CPU, which is 16 panes on an 8-CPU machine.
-- ⏱️ **Every pane has its own schedule.** Each pane changes its widget at its own time, 30 to 45 seconds after the
-  last change, and no two panes show the same widget. Every 5 minutes the whole window is cut again with a new
-  layout and a new number of panes.
-- 🎨 **A new look for the pictures.** The sound wave, the wallpapers and the world map are drawn in color with half
-  blocks, so every cell shows two pixels. There are no random letters and nothing scrolls. The image brings 171
-  wallpapers, from the KDE Plasma set.
-- 💺 **No bad seats.** A widget that needs more room than its pane has is swapped for one that fits.
-- 📌 **A fixed set.** The base is Debian 13 (stable), and Hollywood 1.25 comes from a pinned upstream commit. All 21
-  widgets work.
-- 🧹 **It cleans up.** Your terminal is reset when the show ends, and Byobu never asks about ctrl-a.
-- 📊 **One more widget.** `btop` joins the cast. It shows the CPU, memory, network and processes, and it shrinks to just
-  the CPU box when its pane is small.
+- The number of panes depends on the size of your terminal. The original makes two panes per CPU, which is 16 tiny
+  panes on an 8-CPU machine. Now the terminal size sets a maximum, and each layout picks a random number up to that.
+  When the number is even, all the panes are the same size.
+- Each pane swaps its widget on its own timer, 30 to 45 seconds after the last swap, and no two panes show the same
+  widget. Every 5 minutes the whole window is rebuilt with a new layout and a new number of panes.
+- The sound wave, the wallpapers and the world map are drawn in color with half blocks, so every cell shows two
+  pixels. There are no random letters, and nothing scrolls. The image brings 171 wallpapers from the KDE Plasma set.
+- A widget that needs more room than its pane has gets swapped for one that fits.
+- The base is Debian 13 (stable), and Hollywood 1.25 comes from a pinned upstream commit. All 21 widgets work.
+- Your terminal is reset when the show ends, and Byobu never asks about ctrl-a.
+- There is a new `btop` widget. It shows the CPU, memory, network and processes, and it shrinks to just the CPU box
+  when its pane is small.
 
-The details are in "Behind the scenes". The reasons are in "Director's commentary".
+The details are under "Behind the scenes", and my reasons are under "Director's commentary".
 
 ## 🎭 The cast
 
-Hollywood opens a tmux session and fills it with panes. Each pane runs one widget, which wraps an ordinary tool.
-There are 21 widgets. All of them play themselves.
+Hollywood opens a tmux session and fills it with panes. Each pane runs one widget, and each widget wraps an ordinary
+tool. There are 21 widgets. All of them play themselves.
 
 | Widget | Shows |
 |---|---|
@@ -122,7 +126,7 @@ The `-s` (panes) and `-d` (minimum seconds a pane keeps a widget) options overri
 docker run -it --rm mapitman/hollywood-directors-cut -s 6 -d 60
 ```
 
-To find your terminal size, run `stty size` (it prints rows, then columns).
+To find your terminal size, run `stty size`. It prints rows, then columns.
 
 ## 🎞️ Behind the scenes
 
@@ -130,11 +134,16 @@ How the movie gets made.
 
 ### Pane count and widget time
 
-The entrypoint script sizes the number of panes to your terminal. Docker passes the terminal size in character
-cells, so the script divides the cell count by 1400. The result is the maximum number of panes. It is limited to two panes
-per CPU and to the number of widgets. The script `pane-count.sh` picks a random number of panes from 2 up to that maximum, so some layouts
-have fewer and larger panes, and the widgets that need a big pane can run. A 161x37 terminal (a full-screen terminal
-at 1920x1080 with a typical font) has a maximum of 4 panes. Set `HOLLYWOOD_RANDOM_PANES=0` to always use the maximum.
+The entrypoint script measures your terminal. Docker passes the size in character cells, so the script divides the
+cell count by 1400 to get the maximum number of panes. Two other limits apply: two panes per CPU, and the number of
+widgets. Then `pane-count.sh` picks a random number from 2 up to that maximum. Some layouts end up with fewer and
+larger panes, and that is when the widgets that need a big pane can run. A full-screen terminal on a 1920x1080 screen
+is about 161x37 with a typical font, which gives a maximum of 4 panes. Set `HOLLYWOOD_RANDOM_PANES=0` to always use
+the maximum.
+
+The CPU limit counts the CPUs that the container can see, not the CPUs of your computer. On Linux the two numbers are
+the same. On a Mac, Docker runs in a virtual machine, so the container sees only the CPUs that the virtual machine
+has.
 
 Each pane keeps its widget for 30 to 45 seconds, then swaps in another unused widget. Every pane picks its own time,
 so the panes change at different moments. Every 5 minutes the window is rebuilt: one pane stays, the others are
@@ -142,11 +151,11 @@ replaced, a new number of panes is picked, and the panes are laid out again at r
 
 ### Same-size panes
 
-When the pane count is even, every pane has the same size, give or take one cell for the borders. `even-layout.sh`
-arranges the panes in a grid of columns by rows. It picks the grid whose panes are closest to 2.5 times wider than
-tall, which looks about square in a terminal. For example, 4 panes make a 2 by 2 grid, 6 make 3 columns by 2 rows,
-and 8 make 4 columns by 2 rows. The grid is rebuilt every time the launcher rebuilds the window. An odd pane count
-keeps the random layout.
+When the pane count is even, all the panes get the same size, give or take one cell for the borders. `even-layout.sh`
+arranges them in a grid. It picks the grid whose panes are closest to 2.5 times wider than tall, which looks about
+square in a terminal. Four panes make a 2 by 2 grid, six make 3 columns by 2 rows, and eight make 4 columns by 2 rows.
+The grid is rebuilt every time the launcher rebuilds the window. An odd pane count keeps the random layout, so the
+panes have different sizes.
 
 ### Widget size guard
 
@@ -165,22 +174,23 @@ guard stops the widget and starts a different one that fits.
 All other widgets run in any pane size. To change a minimum or add a widget, edit the `MIN_` tables and the
 `min_rows` function at the top of `widget-guard.sh`.
 
-With the default settings on a 161x37 terminal, no pane is 24 rows tall, so `atop` never runs there.
+On a 161x37 terminal with 4 or more panes, no pane is 24 rows tall, so `atop` cannot run. A layout with 2 or 3 panes
+has room for it.
 
 ### No repeated widgets
 
 No two panes run the same widget. Each running widget holds a claim in `/tmp/hollywood-claims`, and a pane that
 starts or switches picks a widget that nobody else holds. If no unused widget fits in a new pane, the pane closes
-instead of repeating a widget. This only happens with many small panes (for example, 16 panes on a 320x90
-terminal). When a pane is ready to swap and no other widget is free, it keeps its current widget.
+instead of repeating a widget. This only happens with many small panes, for example 16 panes on a 320x90 terminal.
+When a pane is ready to swap and no other widget is free, it keeps its current widget.
 
 ### The btop widget
 
 Hollywood has no `btop` widget, so the image adds one (`btop-widget.sh`). `btop` shows four boxes: the CPU, the
-memory, the network and the processes. All four need a pane of at least 80 columns by 24 lines. A smaller pane
-gets only the CPU box, which fits down to 60 columns by 8 lines. At 161 x 37 the panes are about 80 x 17, so
-they show the CPU box. `btop` updates every 2000 ms by default, and the widget sets 100 ms, the fastest that `btop` allows, so the graphs
-move smoothly.
+memory, the network and the processes. All four need a pane of at least 80 columns by 24 lines. A smaller pane gets
+only the CPU box, which fits down to 60 columns by 8 lines. In a 4-pane layout at 161 x 37 the panes are about
+80 x 17, so they show the CPU box. By default `btop` updates every 2000 ms. The widget sets 100 ms, the fastest that
+`btop` allows, so the graphs move smoothly.
 
 The widget picks the boxes from the pane size when it starts. If you resize the pane across the 80 x 24 edge, it
 starts `btop` again with the boxes that fit. When the widget guard stops it, the widget puts your terminal back the
@@ -199,8 +209,8 @@ Press `q` to leave `btop`. The widget then starts it again, so press ctrl-c to s
 The image replaces Hollywood's `mplayer` widget with two small files, `mplayer-widget.sh` and
 `soundwave-render.py`.
 
-The video is a pre-rendered animation of an audio waveform. It has no sound track. The widget asks `mplayer` to crop
-the video to the rows where the waveform is, scale it to your pane, and send the raw frames to the renderer. The
+The video is a pre-rendered animation of an audio waveform, and it has no sound track. The widget asks `mplayer` to
+crop the video to the rows where the waveform is, scale it to your pane, and send the raw frames to the renderer. The
 renderer draws each terminal cell as a half block, so every cell shows two pixels in true color. When the pane
 changes size, the widget starts again at the new size. A pane with an odd width leaves its last column empty.
 
@@ -243,12 +253,16 @@ docker run -it --rm --entrypoint /opt/hollywood/lib/hollywood/map mapitman/holly
 The Docker build applies one patch, and the patch must match Hollywood's code exactly. If a new Hollywood changes
 the code around the patch, the build fails, so a broken launcher can never end up in the image.
 
-- `launcher.patch`: the Hollywood launcher picks one random pane for each split. When tmux refuses the split because
-  that pane is too small, the launcher does not retry, so you get fewer panes than requested. The patch makes the
-  launcher try every pane in random order, in both directions, until one has room. After the launcher builds the
-  panes, the patch also runs `even-layout.sh`, which gives an even number of panes the same size. At every rebuild, the patch
-  asks `pane-count.sh` for a new pane count. The patch also adds
-  a notice to the launcher that says it was modified, as the Apache License asks.
+`launcher.patch` makes three changes to the Hollywood launcher:
+
+- The launcher picks one random pane for each split. When tmux refuses the split because that pane is too small, the
+  launcher does not retry, so you get fewer panes than requested. The patch makes the launcher try every pane in
+  random order, in both directions, until one has room.
+- After the launcher builds the panes, the patch runs `even-layout.sh`, which gives an even number of panes the same
+  size.
+- At every rebuild, the patch asks `pane-count.sh` for a new pane count.
+
+The patch also adds a notice to the launcher that says it was modified, as the Apache License asks.
 
 ### Byobu ctrl-a
 
@@ -267,20 +281,21 @@ just run
 
 ## 🎙️ Director's commentary
 
-Why each scene was cut the way it was. Each change has a reason.
+Why I cut each scene the way I did.
 
-- **Debian stable base.** `debian:trixie-slim` is a named release, so the base does not change between builds
-  except for security fixes. It has every tool the widgets need, including `mplayer`.
+- **Debian stable base.** `debian:trixie-slim` is a named release, so the base does not change between builds except
+  for security fixes. It has every tool the widgets need, including `mplayer`.
 - **Hollywood from the upstream source.** The Dockerfile fetches the commit tagged `1.25` (`4bfa297`), so the
   Hollywood scripts do not change between builds. This version has all 21 widgets. Its launcher passes the values of
   `-s` and `-d` to its own tmux session, which the entrypoint needs. Its `sshart` widget works with current OpenSSH.
-- **Pane count from terminal size.** Hollywood defaults to two panes per CPU. On an 8-CPU machine that is
-  16 panes, which are too small to read on a 1920x1080 screen. The entrypoint sizes the count to the terminal.
+- **Pane count from terminal size.** Hollywood defaults to two panes per CPU. On an 8-CPU machine that is 16 panes,
+  which are too small to read on a 1920x1080 screen. The entrypoint sizes the count to the terminal and then picks a
+  random number up to that, so the widgets that need a big pane get a turn.
 - **30 to 45 seconds per widget.** Hollywood replaces every pane every 10 seconds by default. That is not long
-  enough to see what is happening in each widget. Some examples:
-  - The `bmon` graph covers 60 seconds of history, so a pane that lasts 10 seconds shows only the first sixth of it.
-    A pane that lasts 30 to 45 seconds shows at least half.
-  - The `code` widget shows each file for 2 seconds and the `bat` widget for 3, so 10 seconds is only a few files.
+  enough to see what is happening in each widget. For example, the `bmon` graph covers 60 seconds of history, so a
+  pane that lasts 10 seconds shows only the first sixth of it. A pane that lasts 30 to 45 seconds shows at least
+  half. The `code` widget shows each file for 2 seconds and the `bat` widget for 3, so 10 seconds is only a few
+  files.
 - **Panes change one at a time.** Hollywood replaces all panes at the same moment, so you cannot finish reading one
   before it disappears. The widget guard gives each pane its own random time between the delay and 1.5 times the
   delay, then swaps the widget inside the pane. Swapping does not rebuild the window. The launcher's own refresh now
@@ -289,8 +304,9 @@ Why each scene was cut the way it was. Each change has a reason.
   tmux refused the split and the window ended up with fewer panes than requested. At 161x37, 2 of 8 launches gave
   3 panes instead of 4.
 - **Widget size guard.** Some widgets keep running in a pane that is too small and show a message instead of
-  content: `atop` asks for 60 x 24, and `bmon` asks you to enlarge the window. At 161x37 the largest panes are
-  18 rows tall. A pane also shrinks while the launcher splits later panes, so the guard checks again on every resize.
+  content: `atop` asks for 60 x 24, and `bmon` asks you to enlarge the window. With 4 panes at 161x37 each pane is
+  at most 18 rows tall. A pane also shrinks while the launcher splits later panes, so the guard checks again on every
+  resize.
 - **No repeated widgets.** The launcher picks the first widget separately from the rest, so two panes can start
   with the same widget. The guard keeps one widget per pane, both at the start and when panes swap.
 - **Wallpapers and a new viewer for the `jp2a` widget.** The image had one JPEG of its own, so the widget showed
@@ -300,11 +316,11 @@ Why each scene was cut the way it was. Each change has a reason.
   with half blocks, the same way as the new `mplayer` widget, and keeps it for 3 seconds. The `map` widget printed
   its picture again every second, so its pane scrolled all the time. It now draws the map once with the same viewer.
 - **A `btop` widget.** Hollywood has no widget for `btop`, a monitor that looks more modern than `htop` and `atop`.
-  `btop` needs 80 x 24 for its four boxes, and the panes of a 1080p screen are about 80 x 17, so a plain `btop` would
-  almost never fit. With only the CPU box it fits in 60 x 8, so the widget shows that box in small panes and all
-  four boxes in big ones. It also updates twenty times as fast as `btop` does by default: every 100 ms, the fastest that `btop` allows, and
-  not every 2000 ms. Counting tmux, which draws the faster updates, that costs about 3% of one core in a normal pane and 11% in a
-  very large one, and 6 MB of memory.
+  `btop` needs 80 x 24 for its four boxes, and the panes of a 4-pane layout on a 1080p screen are about 80 x 17, so
+  a plain `btop` would almost never fit. With only the CPU box it fits in 60 x 8, so the widget shows that box in
+  small panes and all four boxes in big ones. It also updates twenty times as fast as `btop` does by default: every
+  100 ms, the fastest that `btop` allows, instead of every 2000 ms. Counting tmux, which draws the faster updates,
+  that costs about 3% of one core in a normal pane and 11% in a very large one, and 6 MB of memory.
 - **A new `mplayer` widget.** Hollywood plays the sound-wave video at 100 times normal speed. In a 100 x 18 pane
   that redraws the terminal about 950 times a second, which flickers. It also draws the video with libcaca, which
   puts a random-looking letter on every cell, and the letters change on every frame. libcaca has no setting for
@@ -314,8 +330,8 @@ Why each scene was cut the way it was. Each change has a reason.
   testing, it used about 20% of one core in a 161 x 37 pane and about 36% of one core in a 237 x 61 pane.
 - **Same-size panes.** Random splits left panes at uneven sizes, such as 80 x 18, 80 x 9 and 161 x 8 in the same
   window. With an even pane count the layout is now an even grid.
-- **Byobu ctrl-a answered at build time.** The first ctrl-a in a pane opened a question about the ctrl-a mode.
-  The image picks the GNU Screen mode so the question never appears.
+- **Byobu ctrl-a answered at build time.** The first ctrl-a in a pane opened a question about the ctrl-a mode. The
+  image picks the GNU Screen mode so the question never appears.
 - **Terminal reset on exit.** `cmatrix` and `mplayer` hide the cursor, switch to the alternate screen and turn on
   mouse reporting. They cannot undo this when the container stops, so the terminal had no cursor afterward.
 - **Man pages and docs restored.** The slim image removes them, and the `man` and `code` widgets need them.
